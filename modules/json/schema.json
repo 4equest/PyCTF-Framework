@@ -1,0 +1,147 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "type": "object",
+    "properties": {
+        "module": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "built-in",
+                        "external"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "execution": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "environment": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "type"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "directory": {
+            "type": "object",
+            "properties": {
+                "prepare": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "prepare"
+            ],
+            "additionalProperties": false
+        },
+        "data": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "filename": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "output": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "filename": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "input",
+                "output"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "module",
+        "directory",
+        "data"
+    ],
+    "additionalProperties": true,
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "module": {
+                        "properties": {
+                            "type": {
+                                "const": "built-in"
+                            }
+                        }
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "module": {
+                        "required": [
+                            "method"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "module": {
+                        "properties": {
+                            "type": {
+                                "const": "external"
+                            }
+                        }
+                    }
+                }
+            },
+            "then": {
+                "required": [
+                    "execution"
+                ]
+            }
+        }
+    ]
+}
