@@ -28,13 +28,9 @@ if __name__ == "__main__":
         action="store_true",
         help="debug mode"
     )
-    parser.add_argument(
-        "--help", "-h",
-        action="store_true",
-        help="show this help"
-    )
     args = parser.parse_args()
-    if args.help:
-        console.print(Panel(Syntax(parser.format_help(), lexer=pygments.lexers.asm.CObjdumpLexer()), title="help", expand=False))
-        exit(0)
+    print(parser.format_help())
+
+    console.print(Panel(Syntax(parser.format_help(), lexer=pygments.lexers.asm.CObjdumpLexer()), title="help", expand=False))
+    exit(0)
     

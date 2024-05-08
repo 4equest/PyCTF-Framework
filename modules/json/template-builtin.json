@@ -1,0 +1,22 @@
+{
+    "$schema": "./schema.json",
+    "module": {
+        "type": "built-in",
+        "name": "hoge",
+        "method": "run_module"
+    },
+    "execution": {
+        "command": []
+    },
+    "directory": {
+        "prepare": true
+    },
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}
