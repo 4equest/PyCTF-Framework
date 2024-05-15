@@ -1,0 +1,64 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "recipe-name": {
+            "type": "string"
+        },
+        "prepare-recipe-directory": {
+            "type": "boolean"
+        },
+        "modules": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "module-name": {
+                        "type": "string"
+                    },
+                    "recipe-module-name": {
+                        "type": "string"
+                    },
+                    "input-path": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "arguments": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties":{
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "module-name",
+                    "recipe-module-name",
+                    "input-path",
+                    "arguments"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "output": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": [
+        "recipe-name",
+        "prepare-recipe-directory",
+        "modules",
+        "output"
+    ],
+    "additionalProperties": false
+}

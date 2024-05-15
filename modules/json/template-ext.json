@@ -7,7 +7,9 @@
     "execution": {
         "command": [
             "python",
-            "fuga.py"
+            "fuga.py",
+            "{arg1}",
+            "{module_dir}"
         ],
         "environment": {
             "type": "venv"
@@ -19,11 +21,11 @@
     "data": {
         "input": {
             "type": "file",
-            "filename": "input_temp.json"
+            "path": "input_temp.json"
         },
         "output": {
             "type": "file",
-            "filename": "output_temp.json"
+            "path": "output_temp.json"
         }
     }
 }

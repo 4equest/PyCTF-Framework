@@ -1,0 +1,35 @@
+{
+    "$schema": "./schema.json",
+    "recipe-name": "sample-recipe",
+    "prepare-recipe-directory": true,
+    "modules": [
+        {
+            "module-name": "hoge",
+            "recipe-module-name": "recipe-hoge",
+            "input-path": [
+                "$.input1",
+                "$.input2"
+            ],
+            "arguments": [
+                {"arg1": "arg1"}, 
+                {"arg2": "{recipe_dir}"}
+            ]
+        },
+        {
+            "module-name": "fuga",
+            "recipe-module-name": "recipe-fuga",
+            "input-path": [
+                "recipe-hoge.result[1]",
+                "$.input4"
+            ],
+            "arguments": [
+                {"arg3": "arg3"}, 
+                {"arg4": "hugyaaa"}
+            ]
+        }
+    ],
+    "output": [
+        "recipe-hoge.result",
+        "recipe-fuga.result[2]"
+    ]
+}

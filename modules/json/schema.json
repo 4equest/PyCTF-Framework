@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "type": "object",
     "properties": {
-        "$schema":{
+        "$schema": {
             "type": "string"
         },
         "module": {
@@ -71,9 +71,13 @@
                     "type": "object",
                     "properties": {
                         "type": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "file",
+                                "json"
+                            ]
                         },
-                        "filename": {
+                        "path": {
                             "type": "string"
                         }
                     },
@@ -83,9 +87,14 @@
                     "type": "object",
                     "properties": {
                         "type": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "file",
+                                "json"
+                            ],
+                            "required": true
                         },
-                        "filename": {
+                        "path": {
                             "type": "string"
                         }
                     },
@@ -144,6 +153,62 @@
                 "required": [
                     "execution"
                 ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "data": {
+                        "properties": {
+                            "input": {
+                                "properties": {
+                                    "type": {
+                                        "const": "file"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "data": {
+                        "properties": {
+                            "path": {
+                                "required": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "data": {
+                        "properties": {
+                            "output": {
+                                "properties": {
+                                    "type": {
+                                        "const": "file"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "data": {
+                        "properties": {
+                            "path": {
+                                "required": true
+                            }
+                        }
+                    }
+                }
             }
         }
     ]
