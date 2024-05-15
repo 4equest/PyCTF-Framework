@@ -2,6 +2,9 @@
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "type": "object",
     "properties": {
+        "$schema":{
+            "type": "string"
+        },
         "module": {
             "type": "object",
             "properties": {
@@ -101,7 +104,7 @@
         "directory",
         "data"
     ],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "allOf": [
         {
             "if": {
