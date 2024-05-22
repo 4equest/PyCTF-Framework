@@ -34,3 +34,4 @@ if __name__ == "__main__":
     console.print(Panel(Syntax(parser.format_help(), lexer=pygments.lexers.asm.CObjdumpLexer()), title="help", expand=False))
     exit(0)
     
+    framework.cli.start_interactive()
