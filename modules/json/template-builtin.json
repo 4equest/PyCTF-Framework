@@ -8,9 +8,7 @@
     "execution": {
         "command": []
     },
-    "directory": {
-        "prepare": true
-    },
+    "prepare-module-directory": true,
     "data": {
         "input": {
             "type": "json"

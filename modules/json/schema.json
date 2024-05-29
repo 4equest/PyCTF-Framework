@@ -52,16 +52,8 @@
             },
             "additionalProperties": false
         },
-        "directory": {
-            "type": "object",
-            "properties": {
-                "prepare": {
-                    "type": "boolean"
-                }
-            },
-            "required": [
-                "prepare"
-            ],
+        "prepare-module-directory": {
+            "type": "boolean",
             "additionalProperties": false
         },
         "data": {
@@ -110,7 +102,6 @@
     },
     "required": [
         "module",
-        "directory",
         "data"
     ],
     "additionalProperties": false,

@@ -15,9 +15,7 @@
             "type": "venv"
         }
     },
-    "directory": {
-        "prepare": true
-    },
+    "prepare-module-directory": true,
     "data": {
         "input": {
             "type": "file",
