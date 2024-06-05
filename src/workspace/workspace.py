@@ -3,8 +3,8 @@ from recipe import Recipe
 
 class WorkSpace:
     def __init__(self) -> None:
-        self.module_state = [] # モジュール ID(連番とか) 実行状態
-        self.recipe_state = [] # レシピ ID(連番とか) 実行状態
+        self.module_state = [] # モジュール ID(連番とか) 実行状態 モジュールは実行後に破棄してoutputだけ保持しておくべき
+        self.recipe_state = [] # レシピ ID(連番とか) 実行状態 レシピは実行後に破棄してoutputだけ保持しておくべき
         
     def create_workspace(self) -> None:
         # 新規作成の場合 loadと被る部分は__init__にいれるべき
@@ -14,6 +14,7 @@ class WorkSpace:
         pass
     
     def save_workspace(self) -> None:
+        # 実行中のモジュール、レシピがある場合は保存無理
         pass
     
     def run_module(self, module_name, args) -> int:
@@ -23,7 +24,8 @@ class WorkSpace:
         self.module_state.append({
             "module":module,
             "id": module_id,
-            "running":False
+            "running":False,
+            "output": []
             })
         
         return module_id
@@ -42,7 +44,8 @@ class WorkSpace:
         self.recipe_state.append({
             "recipe":recipe,
             "id": recipe_id,
-            "running":False
+            "running":False,
+            "output": []
             })
         
         return recipe_id
