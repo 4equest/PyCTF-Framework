@@ -8,7 +8,7 @@
         "command": [
             "python",
             "fuga.py",
-            "{input[0]}",
+            "{input.0}",
             "{module_dir}"
         ],
         "environment": {

@@ -7,8 +7,8 @@
             "module-name": "hoge",
             "recipe-module-name": "recipe-hoge",
             "input-path": [
-                "{input[0]}",
-                "{input[1]}"
+                "{input.0}",
+                "{input.1}"
             ],
             "arguments": [
                 {"arg1": "arg1"}, 
@@ -19,8 +19,8 @@
             "module-name": "fuga",
             "recipe-module-name": "recipe-fuga",
             "input-path": [
-                "{recipe-hoge.result[1]}",
-                "{input[2].somekey}"
+                "{recipe-hoge.result.1}",
+                "{input.2.somekey}"
             ],
             "arguments": [
                 {"arg3": "arg3"}, 
@@ -30,6 +30,6 @@
     ],
     "output": [
         "{recipe-hoge.result}",
-        "{recipe-fuga.result[2]}"
+        "{recipe-fuga.result.2}"
     ]
 }

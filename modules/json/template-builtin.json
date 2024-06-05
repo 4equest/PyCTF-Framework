@@ -3,7 +3,7 @@
     "module": {
         "type": "built-in",
         "name": "hoge",
-        "method": "run_module"
+        "method": "class"
     },
     "execution": {
         "command": []
