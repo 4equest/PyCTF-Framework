@@ -8,7 +8,13 @@ import jsonschema
 import utils
 
 class Module:
-    def __init__(self, module_name) -> None:
+    def __init__(self, module_name, shell=None) -> None:
+        """
+        Args:
+            module_name (_type_): 起動するモジュール名(NOTファイル名)
+            shell (_type_, optional): レシピからの呼び出しの場合はシェルを再利用できるかも? Defaults to None.
+        """
+        
         self.module_json = None
         self.module_list = self.get_module_list()
         self.module_name = module_name
@@ -20,8 +26,10 @@ class Module:
         if self.module_json['prepare-module-directory']:
             self.variables["module_dir"] = utils.get_temp_folder()
         
-        self.shell = subprocess.Popen("/bin/bash", stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        #todo stdin stdoutのサイズを変更するべき 何のコマンドだっけ...
+        if shell is not None:
+            self.shell = shell
+        else:
+            self.shell = subprocess.Popen("/bin/bash", stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         
     def run(self, args) -> None:
         # モジュール内変数の準備
@@ -50,7 +58,6 @@ class Module:
                 elif not os.path.isfile(requirements_path):
                     raise("requirements.txt is not found")
                 activate_script = os.path.join(venv_path, 'bin', 'activate')
-                command = f"source {activate_script}"
                 self.shell.stdin.write(f"source {activate_script}\n".encode())
                 self.shell.stdin.flush()
             
@@ -66,13 +73,13 @@ class Module:
     def get_result(self):
         (stdout, stderr) = self.shell.communicate()
         print(stdout, stderr)
-        
+        self.variables["output"] = []
         try:
             json_output = json.loads(stdout.decode())
             self.variables["output"] = json_output
         except json.JSONDecodeError:
             print("stdout is not in valid JSON format")
-            self.variables["output"] = stdout.decode()
+            self.variables["output"].append(stdout.decode())
             print(stdout.decode())
             
         return self.variables["output"]
