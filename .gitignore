@@ -162,3 +162,4 @@ cython_debug/
 # junk
 memo.txt
 test_*.py
+test_*.json
