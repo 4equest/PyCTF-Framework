@@ -13,20 +13,21 @@ class Module:
         self.module_list = self.get_module_list()
         self.module_name = module_name
         self.module_path = next((file for file, name in self.module_list if name == self.module_name))
-        self.variables = None # json
+        self.variables = {}
         
-        with open(os.path.join("modules", self.module_path), 'r') as f:
+        with open(os.path.join("modules/json", self.module_path), 'r') as f:
             self.module_json = json.load(f)
         if self.module_json['prepare-module-directory']:
-            self.variables["module_dir"] = utils.get_temp_folder(self.module_json)
+            self.variables["module_dir"] = utils.get_temp_folder()
         
-        self.shell = subprocess.Popen("/bin/bash", stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=1)
+        self.shell = subprocess.Popen("/bin/bash", stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         #todo stdin stdoutのサイズを変更するべき 何のコマンドだっけ...
         
     def run(self, args) -> None:
         # モジュール内変数の準備
-        for arg, arg_count in enumerate(args):
-            self.variables["input"][arg_count] = arg
+        self.variables["input"] = []
+        for arg_count, arg  in enumerate(args):
+            self.variables["input"].append(arg)
         
         if self.module_json['module']["type"] == "built-in":
             if self.module_json['module']["method"] == "class":
@@ -41,7 +42,7 @@ class Module:
         elif self.module_json['module']["type"] == "external":
             execution_command = self.get_execution_command()
             
-            if self.module_json['execution']["environment"]["type"] == "venv":
+            if "environment" in self.module_json['execution'] and self.module_json['execution']["environment"]["type"] == "venv":
                 venv_path = os.path.join("modules", self.module_name, "venv")
                 requirements_path = os.path.join("modules", self.module_name, "requirements.txt")
                 if not os.path.isdir(venv_path) and os.path.isfile(requirements_path):
@@ -54,7 +55,7 @@ class Module:
                 self.shell.stdin.flush()
             
             #todo 
-            self.shell.stdin.write(execution_command + "\n".encode())
+            self.shell.stdin.write((execution_command + "\n").encode())
             self.shell.stdin.flush()
         
         return
@@ -71,6 +72,8 @@ class Module:
             self.variables["output"] = json_output
         except json.JSONDecodeError:
             print("stdout is not in valid JSON format")
+            self.variables["output"] = stdout.decode()
+            print(stdout.decode())
             
         return self.variables["output"]
     
@@ -80,6 +83,8 @@ class Module:
             path = match.group(1).split('.')
             value = self.variables
             for key in path:
+                print(value)
+                print(type(value))
                 if isinstance(value, list):
                     key = int(key)
                 value = value[key]
@@ -87,6 +92,7 @@ class Module:
         return pattern.sub(replacer, template)
         
     def get_execution_command(self):
+        execution_command = "stdbuf -i0 -o0 -e0 "
         for command in self.module_json['execution']['command']:
             command = self.replace_template(command)
             execution_command = execution_command + " " + command
@@ -95,15 +101,15 @@ class Module:
     @staticmethod
     def get_module_list() -> list:
         module_list = []
-        for file in os.listdir('modules'):
+        for file in os.listdir('modules/json'):
             if file.endswith('.json'):
                 if file == 'schema.json':
                     continue
-                with open(os.path.join('modules', file), 'r') as f:
+                with open(os.path.join('modules/json', file), 'r') as f:
                     try:
                         module_json = json.load(f)
-                        jsonschema.validate(module_json, json.load(open('modules/schema.json')))
-                        module_list.append((file, module_json['module-name']))
+                        jsonschema.validate(module_json, json.load(open('modules/json/schema.json')))
+                        module_list.append((file, module_json['module']["name"]))
                     except json.JSONDecodeError:
                         print(f'{file} is invalid json')
                     except jsonschema.exceptions.ValidationError as e:

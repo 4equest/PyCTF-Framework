@@ -83,8 +83,7 @@
                             "enum": [
                                 "file",
                                 "json"
-                            ],
-                            "required": true
+                            ]
                         },
                         "path": {
                             "type": "string"
@@ -144,62 +143,6 @@
                 "required": [
                     "execution"
                 ]
-            }
-        },
-        {
-            "if": {
-                "properties": {
-                    "data": {
-                        "properties": {
-                            "input": {
-                                "properties": {
-                                    "type": {
-                                        "const": "file"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "then": {
-                "properties": {
-                    "data": {
-                        "properties": {
-                            "path": {
-                                "required": true
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        {
-            "if": {
-                "properties": {
-                    "data": {
-                        "properties": {
-                            "output": {
-                                "properties": {
-                                    "type": {
-                                        "const": "file"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "then": {
-                "properties": {
-                    "data": {
-                        "properties": {
-                            "path": {
-                                "required": true
-                            }
-                        }
-                    }
-                }
             }
         }
     ]
