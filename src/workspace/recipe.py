@@ -29,8 +29,11 @@ class Recipe:
             self.variables["input"][arg_count] = arg
             
         for module in self.recipe_json['modules']:
-            self.modules.append(md.Module(module["module-name"]))
+            this_module = md.Module(module["module-name"])
+            this_module.run()
             #todo moduleに必要なモジュール変数を調べて取得して渡して実行
+            
+            self.modules.append(this_module)
             
     async def run_async(self, args) -> None:
         pass

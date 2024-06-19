@@ -6,25 +6,17 @@
         {
             "module-name": "hoge",
             "recipe-module-name": "recipe-hoge",
-            "input-path": [
+            "arguments": [
                 "{input.0}",
                 "{input.1}"
-            ],
-            "arguments": [
-                {"arg1": "arg1"}, 
-                {"arg2": "{recipe_dir}"}
             ]
         },
         {
             "module-name": "fuga",
             "recipe-module-name": "recipe-fuga",
-            "input-path": [
+            "arguments": [
                 "{recipe-hoge.result.1}",
                 "{input.2.somekey}"
-            ],
-            "arguments": [
-                {"arg3": "arg3"}, 
-                {"arg4": "hugyaaa"}
             ]
         }
     ],
