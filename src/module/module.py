@@ -8,11 +8,10 @@ import jsonschema
 import utils
 
 class Module:
-    def __init__(self, module_name, shell=None) -> None:
+    def __init__(self, module_name) -> None:
         """
         Args:
             module_name (_type_): 起動するモジュール名(NOTファイル名)
-            shell (_type_, optional): レシピからの呼び出しの場合はシェルを再利用できるかも? Defaults to None.
         """
         
         self.module_json = None
@@ -25,11 +24,6 @@ class Module:
             self.module_json = json.load(f)
         if self.module_json['prepare-module-directory']:
             self.variables["module_dir"] = utils.get_temp_folder()
-        
-        if shell is not None:
-            self.shell = shell
-        else:
-            self.shell = subprocess.Popen("/bin/bash", stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         
     def run(self, args) -> None:
         # モジュール内変数の準備
@@ -58,20 +52,17 @@ class Module:
                 elif not os.path.isfile(requirements_path):
                     raise("requirements.txt is not found")
                 activate_script = os.path.join(venv_path, 'bin', 'activate')
-                self.shell.stdin.write(f"source {activate_script}\n".encode())
-                self.shell.stdin.flush()
+                execution_command = f"source {activate_script} && " + execution_command
             
-            #todo 
-            self.shell.stdin.write((execution_command + "\n").encode())
-            self.shell.stdin.flush()
-        
+            self.shell = subprocess.run(execution_command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+
         return
         
     async def run_async(self, args) -> None:
         pass
     
     def get_result(self):
-        (stdout, stderr) = self.shell.communicate()
+        stdout, stderr = self.shell.stdout, self.shell.stderr
         print(stdout, stderr)
         self.variables["output"] = []
         try:
