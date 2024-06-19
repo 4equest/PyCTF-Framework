@@ -75,24 +75,11 @@ class Module:
             
         return self.variables["output"]
     
-    def replace_template(self, template):
-        pattern = re.compile(r'\{(.+?)\}')
-        def replacer(match):
-            path = match.group(1).split('.')
-            value = self.variables
-            for key in path:
-                print(value)
-                print(type(value))
-                if isinstance(value, list):
-                    key = int(key)
-                value = value[key]
-            return str(value)
-        return pattern.sub(replacer, template)
         
     def get_execution_command(self):
         execution_command = "stdbuf -i0 -o0 -e0 "
         for command in self.module_json['execution']['command']:
-            command = self.replace_template(command)
+            command = utils.replace_template(self.variables, command)
             execution_command = execution_command + " " + command
         return execution_command
         

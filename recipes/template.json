@@ -15,13 +15,13 @@
             "module-name": "fuga",
             "recipe-module-name": "recipe-fuga",
             "arguments": [
-                "{recipe-hoge.result.1}",
+                "{recipe-hoge.output.1}",
                 "{input.2.somekey}"
             ]
         }
     ],
     "output": [
-        "{recipe-hoge.result}",
-        "{recipe-fuga.result.2}"
+        "{recipe-hoge.output}",
+        "{recipe-fuga.output.2}"
     ]
 }
