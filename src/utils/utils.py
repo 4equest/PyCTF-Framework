@@ -6,6 +6,7 @@ def get_temp_folder():
 
 def replace_template(variables, template):
     pattern = re.compile(r'\{(.+?)\}')
+    
     def replacer(match):
         path = match.group(1).split('.')
         value = variables
@@ -15,5 +16,8 @@ def replace_template(variables, template):
             if isinstance(value, list):
                 key = int(key)
             value = value[key]
-        return str(value)
+        
+        if type(value) == dict:
+            return(str(value))
+        return value
     return pattern.sub(replacer, template)

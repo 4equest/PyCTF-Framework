@@ -37,7 +37,7 @@ class Recipe:
             this_module.run(module['arguments'])
             module_result = this_module.get_result()
             self.variables[module["recipe-module-name"]] = {"output": []}
-            self.variables[module["recipe-module-name"]]["output"].append(module_result)
+            self.variables[module["recipe-module-name"]]["output"] = module_result
             #self.modules.append(this_module)
             
     def get_result(self):
