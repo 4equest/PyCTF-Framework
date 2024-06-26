@@ -79,7 +79,7 @@ class WorkSpace:
     async def run_recipe_async(self, recipe_name, args) -> int:
         pass
     
-    def get_recipe_result(self, id) -> None:
+    def get_recipe_result(self, id) -> object:
         if id not in self.recipe_state:
             raise KeyError("recipe_id: {} not found".format(id))
         self.recipe_state[id]["output"] = self.recipe_state[id]["recipe"].get_result()
