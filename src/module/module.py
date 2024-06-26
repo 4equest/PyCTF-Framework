@@ -25,7 +25,7 @@ class Module:
         if self.module_json['prepare-module-directory']:
             self.variables["module_dir"] = utils.get_temp_folder()
         
-    def run(self, args) -> None:
+    def run(self, args: list) -> None:
         # モジュール内変数の準備
         self.variables["input"] = []
         for arg_count, arg  in enumerate(args):
