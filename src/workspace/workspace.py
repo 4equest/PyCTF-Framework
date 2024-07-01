@@ -2,6 +2,7 @@ import utils
 from module import Module
 from recipe import Recipe
 import uuid
+from dataclasses import dataclass
 
 class WorkSpace:
     def __init__(self,
@@ -19,18 +20,17 @@ class WorkSpace:
         self.workspace_id = workspace_id
         #self.workspace_path = workspace_path
         
-    def create_workspace(self) -> None:
-        # 新規作成の場合 loadと被る部分は__init__にいれるべき
-        pass
-    
-    def load_workspace(self) -> None:
-        pass
-    
-    def save_workspace(self) -> None:
-        # 実行中のモジュール、レシピがある場合は保存無理
-        pass
-    
     def run_module(self, module_name: str, args: list) -> str:
+        """
+        モジュールの実行
+        
+        Args:
+            module_name (str): モジュール名
+            args (list): モジュールの引数
+
+        Returns:
+            str: モジュール実行id
+        """
         module = Module(module_name)
         module.run(args)
         module_id = self.get_next_module_id()
@@ -45,12 +45,30 @@ class WorkSpace:
         
     
     async def run_module_async(self, module_name, args) -> int:
+        #クリティカルセクションには気を付けよう！
         pass
     
     def get_module_result(self, id: str) -> object:
+        """
+        モジュールの実行結果を取得
+        
+        Args:
+            id (str): モジュールID
+            
+        Returns:
+            object: モジュールの実行結果
+        """
         if id not in self.module_state:
             raise KeyError("module_id: {} not found".format(id))
+        
+        # todo raiseするのは違うよね
+        if self.module_state[id]["running"]:
+            raise RuntimeError("module_id: {} is running".format(id))
+        
         self.module_state[id]["output"] = self.module_state[id]["module"].get_result()
+        
+        # del self.module_state[id]["module"] # モジュールは実行後に破棄 todo 後で確認
+        
         return self.module_state[id]["output"]
     
     def get_module_state_list(self) -> object:
@@ -82,7 +100,15 @@ class WorkSpace:
     def get_recipe_result(self, id) -> object:
         if id not in self.recipe_state:
             raise KeyError("recipe_id: {} not found".format(id))
+        
+        # todo raiseするのは違うよね
+        if self.recipe_state[id]["running"]:
+            raise KeyError("recipe_id: {} is running".format(id))
+        
         self.recipe_state[id]["output"] = self.recipe_state[id]["recipe"].get_result()
+        
+        # del self.recipe_state[id]["recipe"] # レシピは実行後に破棄 todo 後で確認
+        
         return self.recipe_state[id]["output"]
     
     def get_recipe_state_list(self) -> object:
@@ -112,3 +138,4 @@ class WorkSpace:
     
     def get_next_cmd_id(self) -> str:
         return "cmd-" + str(uuid.uuid4())
+    

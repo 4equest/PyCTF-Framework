@@ -45,7 +45,7 @@ def load_workspace_unsafe(workspace_path: str) -> WorkSpace:
     信頼できないソースからのWorkspaceを開かないでください。
 
     Args:
-        workspace_name (str): _description_
+        workspace_path (str): 読み込むファイルのパス
 
     Returns:
         WorkSpace: _description_
@@ -60,6 +60,7 @@ def save_workspace_unsafe(workspace: WorkSpace, workspace_path: str) -> int:
     モジュールの状態なども含めて保存できる
 
     Args:
+        workspace (WorkSpace): WorkSpaceインスタンス
         workspace_path (str): _description_
 
     Returns:
