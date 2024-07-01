@@ -101,15 +101,3 @@ class Module:
                     except jsonschema.exceptions.ValidationError as e:
                         print(f'{file} is invalid json schema')
         return module_list
-=======
-
-class Module:
-    def __init__(self) -> None:
-        pass
-    
-    def get_module_list(self) -> None:
-        pass
-
-    def run_module(self) -> None:
-        pass
-
