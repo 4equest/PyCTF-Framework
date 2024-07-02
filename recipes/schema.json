@@ -22,26 +22,16 @@
                     "recipe-module-name": {
                         "type": "string"
                     },
-                    "input-path": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
                     "arguments": {
                         "type": "array",
                         "items": {
-                            "type": "object",
-                            "additionalProperties":{
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     }
                 },
                 "required": [
                     "module-name",
                     "recipe-module-name",
-                    "input-path",
                     "arguments"
                 ],
                 "additionalProperties": false

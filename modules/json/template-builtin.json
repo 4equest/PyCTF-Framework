@@ -3,14 +3,12 @@
     "module": {
         "type": "built-in",
         "name": "hoge",
-        "method": "run_module"
+        "method": "class"
     },
     "execution": {
         "command": []
     },
-    "directory": {
-        "prepare": true
-    },
+    "prepare-module-directory": true,
     "data": {
         "input": {
             "type": "json"
