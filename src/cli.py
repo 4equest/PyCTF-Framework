@@ -2,10 +2,10 @@ import argparse
 import sys
 import os
 
-# for test
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+# Add src directory to the system path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from workspace.manager import create_workspace, load_workspace, save_workspace
+from workspace.manager import create_workspace, load_workspace, load_workspace_unsafe, save_workspace, save_workspace_unsafe
 from workspace.workspace import WorkSpace
 
 def create_workspace_cmd(args):
@@ -14,29 +14,29 @@ def create_workspace_cmd(args):
     print(f"Workspace '{args.name}' created and saved.")
 
 def load_workspace_cmd(args):
-    workspace = load_workspace(f"{args.name}.json")
+    workspace = load_workspace_unsafe(f"{args.name}.json")
     print(f"Workspace '{args.name}' loaded.")
     return workspace
 
 def save_workspace_cmd(args):
-    workspace = load_workspace(f"{args.name}.json")
+    workspace = load_workspace_unsafe(f"{args.name}.json")
     save_workspace(workspace, f"{args.name}.json")
     print(f"Workspace '{workspace.workspace_name}' saved.")
 
 def list_modules(args):
-    workspace = load_workspace(f"{args.name}.json")
+    workspace = load_workspace_unsafe(f"{args.name}.json")
     modules = workspace.get_module_list()
     for module in modules:
         print(module)
 
 def list_recipes(args):
-    workspace = load_workspace(f"{args.name}.json")
+    workspace = load_workspace_unsafe(f"{args.name}.json")
     recipes = workspace.get_recipe_list()
     for recipe in recipes:
         print(recipe)
 
 def module_info(args):
-    workspace = load_workspace(f"{args.name}.json")
+    workspace = load_workspace_unsafe(f"{args.name}.json")
     info = workspace.get_module_info(args.module_name)
     if info:
         print(info)
@@ -44,7 +44,7 @@ def module_info(args):
         print(f"Module '{args.module_name}' not found.")
 
 def recipe_info(args):
-    workspace = load_workspace(f"{args.name}.json")
+    workspace = load_workspace_unsafe(f"{args.name}.json")
     info = workspace.get_recipe_info(args.recipe_name)
     if info:
         print(info)
@@ -52,19 +52,19 @@ def recipe_info(args):
         print(f"Recipe '{args.recipe_name}' not found.")
 
 def run_module(args):
-    workspace = load_workspace(f"{args.workspace}.json")
+    workspace = load_workspace_unsafe(f"{args.workspace}.json")
     module_id = workspace.run_module(args.module_name, args.args)
     result = workspace.get_module_result(module_id)
     print(f"Module '{args.module_name}' executed with result: {result}")
 
 def run_recipe(args):
-    workspace = load_workspace(f"{args.workspace}.json")
+    workspace = load_workspace_unsafe(f"{args.workspace}.json")
     recipe_id = workspace.run_recipe(args.recipe_name, args.args)
     result = workspace.get_recipe_result(recipe_id)
     print(f"Recipe '{args.recipe_name}' executed with result: {result}")
 
 def run_os_command(args):
-    workspace = load_workspace(f"{args.workspace}.json")
+    workspace = load_workspace_unsafe(f"{args.workspace}.json")
     cmd_id = workspace.run_cmd(args.args)
     result = workspace.get_cmd_result(cmd_id)
     print(f"Command executed with result: {result}")
