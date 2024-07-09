@@ -12,6 +12,7 @@ from workspace.manager import create_workspace, save_workspace, load_workspace_u
 from workspace.workspace import WorkSpace
 
 current_workspace = None
+parser = None
 
 def set_workspace_name(name):
     global current_workspace_name
@@ -30,19 +31,6 @@ def create_workspace_cmd(args):
     save_workspace_unsafe(current_workspace, args.name)
     print(f"Workspace '{args.name}' created and saved.")
 
-# def create_workspace_cmd(args):
-#     global current_workspace
-#     set_workspace_name(args.name)  # args.nameを使用してワークスペース名を設定
-#     current_workspace = create_workspace(get_or_load_workspace())  # グローバル変数からワークスペース名を取得
-#     save_workspace_unsafe(current_workspace, get_or_load_workspace())
-#     print(f"Workspace '{get_or_load_workspace()}' created and saved.")
-
-# def create_workspace_cmd(args):
-#     global current_workspace
-#     current_workspace = create_workspace(args.name)
-#     save_workspace_unsafe(current_workspace, f"{args.name}")
-#     print(f"Workspace '{args.name}' created and saved.")
-
 def load_workspace_cmd(args):
     global current_workspace
     current_workspace = get_or_load_workspace(args.name)
@@ -53,7 +41,7 @@ def save_workspace_cmd(args):
     if current_workspace is None:
         print("No workspace loaded.")
         return
-    save_workspace_unsafe(current_workspace, f"{current_workspace.workspace_name}")
+    save_workspace_unsafe(current_workspace, current_workspace.workspace_name)
     print(f"Workspace '{current_workspace.workspace_name}' saved.")
 
 def list_modules(args):
@@ -101,6 +89,9 @@ def run_module(args):
     if current_workspace is None:
         print("No workspace loaded.")
         return
+    if not args.module_name:
+        print("Error: module_name is required.")
+        return
     module_id = current_workspace.run_module(args.module_name, args.args)
     result = current_workspace.get_module_result(module_id)
     print(f"Module '{args.module_name}' executed with result: {result}")
@@ -109,6 +100,9 @@ def run_recipe(args):
     global current_workspace
     if current_workspace is None:
         print("No workspace loaded.")
+        return
+    if not args.recipe_name:
+        print("Error: recipe_name is required.")
         return
     recipe_id = current_workspace.run_recipe(args.recipe_name, args.args)
     result = current_workspace.get_recipe_result(recipe_id)
@@ -131,65 +125,28 @@ def parse_command(command):
         print("Invalid command")
 
 def start_interactive():
-    session = PromptSession(history=InMemoryHistory())
-    completer = WordCompleter(['create', 'load', 'save', 'list-modules', 'list-recipes', 'module-info', 'recipe-info', 'run-module', 'run-recipe', 'exit'], ignore_case=True)
-    
-    print("Starting interactive mode. Type 'exit' to quit.")
+    commands = ['create', 'load', 'save', 'list-modules', 'list-recipes', 'module-info', 'recipe-info', 'run-module', 'run-recipe', 'run-cmd']
+    completer = WordCompleter(commands, ignore_case=True)
+    session = PromptSession(completer=completer)
+
     while True:
         try:
-            user_input = session.prompt(">> ", completer=completer).strip()
-            if user_input.lower() == 'exit':
-                break
-
-            args = user_input.split()
+            text = session.prompt('> ')
+            args = text.split()
             if not args:
                 continue
-
-            command = args[0]
-            if command == 'create':
-                if len(args) != 2:
-                    print("Usage: create <workspace_name>")
-                else:
-                    create_workspace_cmd(argparse.Namespace(name=args[1]))
-            elif command == 'load':
-                if len(args) != 2:
-                    print("Usage: load <workspace_name>")
-                else:
-                    load_workspace_cmd(argparse.Namespace(name=args[1]))
-            elif command == 'save':
-                save_workspace_cmd(None)
-            elif command == 'list-modules':
-                list_modules(None)
-            elif command == 'list-recipes':
-                list_recipes(None)
-            elif command == 'module-info':
-                if len(args) != 2:
-                    print("Usage: module-info <module_name>")
-                else:
-                    module_info(argparse.Namespace(module_name=args[1]))
-            elif command == 'recipe-info':
-                if len(args) != 2:
-                    print("Usage: recipe-info <recipe_name>")
-                else:
-                    recipe_info(argparse.Namespace(recipe_name=args[1]))
-            elif command == 'run-module':
-                if len(args) < 2:
-                    print("Usage: run-module <module_name> [args...]")
-                else:
-                    run_module(argparse.Namespace(module_name=args[1], args=args[2:]))
-            elif command == 'run-recipe':
-                if len(args) < 2:
-                    print("Usage: run-recipe <recipe_name> [args...]")
-                else:
-                    run_recipe(argparse.Namespace(recipe_name=args[1], args=args[2:]))
-            elif command.startswith('!'):
-                run_os_command(argparse.Namespace(args=args[1:]))
+            parsed_args = parser.parse_args(args)
+            if hasattr(parsed_args, 'func'):
+                parsed_args.func(parsed_args)
             else:
-                print(f"Unknown command: {command}")
+                print("Unknown command")
+        except KeyboardInterrupt:
+            break
         except Exception as e:
             print(f"Error: {e}")
 
 def main():
+    global parser
     parser = argparse.ArgumentParser(description="CLI for workspace management and execution.")
     subparsers = parser.add_subparsers()
 
@@ -235,14 +192,14 @@ def main():
     parser_interactive = subparsers.add_parser('interactive', help='Start interactive mode')
     parser_interactive.set_defaults(func=lambda args: start_interactive())
 
-    # if len(sys.argv) == 1:
-    #     start_interactive()
-    # else:
-    #     args = parser.parse_args()
-    #     if hasattr(args, 'func'):
-    #         args.func(args)
-    #     else:
-    #         parse_command(' '.join(sys.argv[1:]))
+    if len(sys.argv) == 1:
+        start_interactive()
+    else:
+        args = parser.parse_args()
+        if hasattr(args, 'func'):
+            args.func(args)
+        else:
+            parse_command(' '.join(sys.argv[1:]))
 
     if len(sys.argv) > 1:
         command = sys.argv[1]
@@ -258,17 +215,18 @@ def main():
             line = session.prompt('> ')
             if line.startswith("create "):
                 args = line.split()
-                create_workspace_cmd(args=argparse.Namespace(name=args[1]))
+                create_workspace_cmd(argparse.Namespace(name=args[1]))
             elif line.startswith("load "):
                 args = line.split()
-                load_workspace_cmd(args=argparse.Namespace(name=args[1]))
+                load_workspace_cmd(argparse.Namespace(name=args[1]))
             elif line.startswith("save"):
                 save_workspace_cmd()
             elif line == "exit":
                 break
         except KeyboardInterrupt:
             break
-
+        except Exception as e:
+            print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
