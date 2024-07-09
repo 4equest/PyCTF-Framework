@@ -14,7 +14,7 @@ class Recipe:
         if self.recipe_name in self.recipe_list:
             self.recipe_path = self.recipe_list[recipe_name]
         else:
-            raise(f"Error: {recipe_name} is not found.")
+            raise Exception(f"Error: {recipe_name} is not found.")
             
         self.variables = {}
         with open(os.path.join("recipes", self.recipe_path), 'r') as f:
@@ -35,8 +35,8 @@ class Recipe:
         for module in self.recipe_json['modules']:
             this_module = md.Module(module["module-name"])
             #todo moduleに必要なモジュール変数を調べて取得して渡して実行
-            if module['arguments'].__len__() > args.count:
-                raise("Arguments is not enough")
+            if len(module['arguments']) > len(args):
+                raise Exception(f"Error: {module['module-name']} module requires {len(module['arguments'])} arguments, but {len(args)} arguments are given.")
             
             for arg_count, arg in enumerate(module['arguments']):
                 module['arguments'][arg_count] = utils.replace_template(self.variables, arg)
