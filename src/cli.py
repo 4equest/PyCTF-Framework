@@ -142,8 +142,6 @@ def start_interactive():
                 print("Unknown command")
         except KeyboardInterrupt:
             break
-        except Exception as e:
-            print(f"Error: {e}")
 
 def main():
     global parser
