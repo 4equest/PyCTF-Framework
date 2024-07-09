@@ -11,8 +11,8 @@ def replace_template(variables, template):
         path = match.group(1).split('.')
         value = variables
         for key in path:
-            print(value)
-            print(type(value))
+            # print(value)
+            # print(type(value))
             if isinstance(value, list):
                 key = int(key)
             value = value[key]

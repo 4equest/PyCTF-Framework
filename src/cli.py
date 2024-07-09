@@ -230,14 +230,7 @@ def start_interactive():
             if hasattr(args, 'func'):
                 args.func(args)
                 # escaped_workspace = html.escape(str(current_workspace) or "")
-            else:
-                print(f"Invalid command: {command}")
-                parser.print_help()
-        except argparse.ArgumentError as e:
-            print(f"Error: {e}")
-            parser.print_help()
-        except Exception as e:
-            print(f"An error occurred: {e}")
+            else:     
 
 def main():
     global parser

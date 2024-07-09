@@ -11,7 +11,11 @@ class Recipe:
         self.recipe_json = None
         self.recipe_list = self.get_recipe_list()
         self.recipe_name = recipe_name
-        self.recipe_path = next((file for file, name in self.recipe_list if name == self.recipe_name))
+        if self.recipe_name in self.recipe_list:
+            self.recipe_path = self.recipe_list[recipe_name]
+        else:
+            raise Exception(f"Error: {recipe_name} is not found.")
+            
         self.variables = {}
         with open(os.path.join("recipes", self.recipe_path), 'r') as f:
             self.recipe_json = json.load(f)
@@ -22,7 +26,7 @@ class Recipe:
         self.modules = []
         
         
-    def run(self, args) -> None:
+    def run(self, args: list) -> None:
         # レシピ内変数の準備
         self.variables["input"] = []
         for arg_count, arg in enumerate(args):
@@ -31,6 +35,9 @@ class Recipe:
         for module in self.recipe_json['modules']:
             this_module = md.Module(module["module-name"])
             #todo moduleに必要なモジュール変数を調べて取得して渡して実行
+            if len(module['arguments']) > len(args):
+                raise Exception(f"Error: {module['module-name']} module requires {len(module['arguments'])} arguments, but {len(args)} arguments are given.")
+            
             for arg_count, arg in enumerate(module['arguments']):
                 module['arguments'][arg_count] = utils.replace_template(self.variables, arg)
                 
@@ -50,8 +57,8 @@ class Recipe:
         pass
     
     @staticmethod
-    def get_recipe_list() -> list:
-        recipe_list = []
+    def get_recipe_list() -> dict:
+        recipe_list = {}
         for file in os.listdir('recipes'):
             if file.endswith('.json'):
                 if file == 'schema.json':
@@ -60,7 +67,7 @@ class Recipe:
                     try:
                         recipe_json = json.load(f)
                         jsonschema.validate(recipe_json, json.load(open('recipes/schema.json')))
-                        recipe_list.append((file, recipe_json['recipe-name']))
+                        recipe_list[recipe_json['recipe-name']] = file
                     except json.JSONDecodeError:
                         print(f'{file} is invalid json')
                     except jsonschema.exceptions.ValidationError as e:

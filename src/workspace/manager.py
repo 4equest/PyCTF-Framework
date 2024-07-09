@@ -1,6 +1,9 @@
 import pickle
 import utils
+import os
 from .workspace import WorkSpace
+
+WORKSPACE_DIR = "workspace"
 
 def create_workspace(workspace_name: str) -> WorkSpace:
     """
@@ -50,7 +53,7 @@ def load_workspace_unsafe(workspace_path: str) -> WorkSpace:
     Returns:
         WorkSpace: _description_
     """
-    with open(workspace_path, "rb") as f:
+    with open(os.path.join(WORKSPACE_DIR, workspace_path), "rb") as f:
         return pickle.load(f)
     
 
@@ -66,7 +69,7 @@ def save_workspace_unsafe(workspace: WorkSpace, workspace_path: str) -> int:
     Returns:
         int: 未定
     """
-    with open(workspace_path, "wb") as f:
+    with open(os.path.join(WORKSPACE_DIR, workspace_path), "wb") as f:
         pickle.dump(workspace, f)
 
     return 0
