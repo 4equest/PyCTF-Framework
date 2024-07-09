@@ -2,7 +2,6 @@ import argparse
 import sys
 import os
 import glob
-import html
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.completion import Completer, Completion, WordCompleter, NestedCompleter
@@ -206,19 +205,24 @@ def start_interactive():
     session = PromptSession(history=InMemoryHistory(), completer=completer)
 
     style = Style.from_dict({
-        'prompt': 'ansiblue'
+        'prompt': 'ansiblue',
+        'rprompt': 'bg:#fD0DD0 #ffffff',
     })
-    # completer = CommandCompleter()
-    session = PromptSession(history=InMemoryHistory(), completer=completer)
+    
+    def status_line():
+        return 'To exit Ctrl+C or type "exit" or "quit"'
+    
 
-    style = Style.from_dict({
-        'prompt': 'ansiblue'
-    })
+    # last_command = ""
+
+    # def get_rprompt():
+    #     return f'< Last command: {last_command}'
 
     while True:
         try:
+            workspace_name = current_workspace.workspace_name if current_workspace else "No workspace"
             # escaped_workspace = html.escape(str(current_workspace) or "")
-            command = session.prompt(HTML(f'<prompt>> </prompt>'), style=style)
+            command = session.prompt(f'{workspace_name}> ', bottom_toolbar=status_line, style=style)
             # command = session.prompt('> ')
             if command.strip().lower() in ['exit', 'quit']:
                 break
