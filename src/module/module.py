@@ -68,15 +68,15 @@ class Module:
     
     def get_result(self):
         stdout, stderr = self.shell.stdout, self.shell.stderr
-        print(stdout, stderr)
+        # print(stdout, stderr)
         self.variables["output"] = []
         try:
             json_output = json.loads(stdout.decode())
             self.variables["output"] = json_output
         except json.JSONDecodeError:
-            print("stdout is not in valid JSON format")
+            # print("stdout is not in valid JSON format")
             self.variables["output"].append(stdout.decode())
-            print(stdout.decode())
+            # print(stdout.decode())
             
         return self.variables["output"]
     
