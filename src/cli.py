@@ -3,7 +3,7 @@ import sys
 import os
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
-from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.completion import Completer, Completion, WordCompleter
 
 # Ensure the parent directories are in the path for importing
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
@@ -13,6 +13,13 @@ from workspace.workspace import WorkSpace
 
 current_workspace = None
 parser = None
+
+class CustomArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        raise argparse.ArgumentError(None, message)
+
+    def print_help(self, file=None):
+        super().print_help(file)
 
 def set_workspace_name(name):
     global current_workspace_name
@@ -50,8 +57,7 @@ def list_modules(args):
         print("No workspace loaded.")
         return
     modules = current_workspace.get_module_list()
-    for module in modules:
-        print(module)
+    print("Modules:", modules)
 
 def list_recipes(args):
     global current_workspace
@@ -59,93 +65,160 @@ def list_recipes(args):
         print("No workspace loaded.")
         return
     recipes = current_workspace.get_recipe_list()
-    for recipe in recipes:
-        print(recipe)
+    print("Recipes:", recipes)
 
 def module_info(args):
     global current_workspace
     if current_workspace is None:
         print("No workspace loaded.")
         return
-    info = current_workspace.get_module_info(args.module_name)
-    if info:
-        print(info)
-    else:
+    module = current_workspace.get_module(args.module_name)
+    if module is None:
         print(f"Module '{args.module_name}' not found.")
+        return
+    print(f"Module '{args.module_name}': {module.get_info()}")
 
 def recipe_info(args):
     global current_workspace
     if current_workspace is None:
         print("No workspace loaded.")
         return
-    info = current_workspace.get_recipe_info(args.recipe_name)
-    if info:
-        print(info)
-    else:
+    recipe = current_workspace.get_recipe(args.recipe_name)
+    if recipe is None:
         print(f"Recipe '{args.recipe_name}' not found.")
+        return
+    print(f"Recipe '{args.recipe_name}': {recipe.get_info()}")
 
 def run_module(args):
     global current_workspace
     if current_workspace is None:
         print("No workspace loaded.")
         return
-    if not args.module_name:
-        print("Error: module_name is required.")
+    module = current_workspace.get_module(args.module_name)
+    if module is None:
+        print(f"Module '{args.module_name}' not found.")
         return
-    module_id = current_workspace.run_module(args.module_name, args.args)
-    result = current_workspace.get_module_result(module_id)
-    print(f"Module '{args.module_name}' executed with result: {result}")
+    module.run(args.args)
+    print(f"Module '{args.module_name}' executed with arguments: {args.args}")
 
 def run_recipe(args):
     global current_workspace
     if current_workspace is None:
         print("No workspace loaded.")
         return
-    if not args.recipe_name:
-        print("Error: recipe_name is required.")
+    recipe = current_workspace.get_recipe(args.recipe_name)
+    if recipe is None:
+        print(f"Recipe '{args.recipe_name}' not found.")
         return
-    recipe_id = current_workspace.run_recipe(args.recipe_name, args.args)
-    result = current_workspace.get_recipe_result(recipe_id)
-    print(f"Recipe '{args.recipe_name}' executed with result: {result}")
+    recipe.run(args.args)
+    print(f"Recipe '{args.recipe_name}' executed with arguments: {args.args}")
 
 def run_os_command(args):
-    global current_workspace
-    if current_workspace is None:
-        print("No workspace loaded.")
-        return
-    cmd_id = current_workspace.run_cmd(args.args)
-    result = current_workspace.get_cmd_result(cmd_id)
-    print(f"Command executed with result: {result}")
+    os.system(' '.join(args.args))
+    print(f"OS command executed: {' '.join(args.args)}")
 
-def parse_command(command):
-    if command.startswith("!"):
-        cmd_args = command[1:].split()
-        run_os_command(argparse.Namespace(args=cmd_args))
-    else:
-        print("Invalid command")
+# class CommandCompleter(Completer):
+#     def __init__(self):
+#         # self.commands = ['create', 'load', 'save', 'list-modules', 'list-recipes', 'module-info', 'recipe-info', 'run-module', 'run-recipe', 'run-cmd', 'exit']
+#         self.commands = ['create', 'load', 'save', 'list-modules', 'list-recipes', 'module-info', 'recipe-info', 'run', 'module', 'recipe', 'cmd', 'exit']
+#         self.files_and_dirs = self._get_files_and_dirs()
+
+#     def _get_files_and_dirs(self):
+#         current_dir = os.getcwd()
+#         return [f for f in os.listdir(current_dir) if os.path.isdir(os.path.join(current_dir, f)) or os.path.isfile(os.path.join(current_dir, f))]
+
+#     def get_completions(self, document, complete_event):
+#         text = document.text_before_cursor.strip().split()
+#         if len(text) == 1:
+#             for cmd in self.commands:
+#                 if cmd.startswith(text[0]):
+#                     yield Completion(cmd, start_position=-len(text[0]))
+#         elif len(text) == 2 and text[0] == 'load':
+#             for name in self.files_and_dirs:
+#                 if name.startswith(text[1]):
+#                     yield Completion(name, start_position=-len(text[1]))
+
+class CommandCompleter(Completer):
+    def __init__(self):
+        # self.commands = ['create', 'load', 'save', 'list-modules', 'list-recipes', 'module-info', 'recipe-info', 'run-module', 'run-recipe', 'run-cmd', 'exit']
+        self.commands = ['create', 'load', 'save', 'list', 'info', 'run', 'module', 'recipe', 'cmd', 'exit']
+        self.run_subcommands = ['module', 'recipe', 'cmd']
+        self.files_and_dirs = self._get_files_and_dirs()
+
+    def _get_files_and_dirs(self):
+        current_dir = os.getcwd()
+        return [f for f in os.listdir(current_dir) if os.path.isdir(os.path.join(current_dir, f)) or os.path.isfile(os.path.join(current_dir, f))]
+
+    # 直前に補完された引数が補完されるのか？
+    def get_completions(self, document, complete_event):
+        text = document.text_before_cursor.strip().split()
+        if len(text) == 1:
+            for cmd in self.commands:
+                if cmd.startswith(text[0]):
+                    yield Completion(cmd, start_position=-len(text[0]))
+        elif len(text) == 2:
+            if text[0] == 'run':
+                for subcmd in self.run_subcommands:
+                    if subcmd.startswith(text[1]):
+                        yield Completion(subcmd, start_position=-len(text[1]))
+            elif text[0] == 'load':
+                for name in self.files_and_dirs:
+                    if name.startswith(text[1]):
+                        yield Completion(name, start_position=-len(text[1]))
+    # def get_completions(self, document, complete_event):
+    #     text = document.text_before_cursor.strip().split()
+    #     if len(text) == 1:
+    #         for cmd in self.commands:
+    #             if cmd.startswith(text[0]):
+    #                 yield Completion(cmd, start_position=-len(text[0]))
+    #     elif len(text) == 2:
+    #         if text[0] == 'run':
+    #             for subcmd in self.run_subcommands:
+    #                 if subcmd.startswith(text[1]):
+    #                     yield Completion(subcmd, start_position=-len(text[1]))
+    #         elif text[0] == 'load':
+    #             for name in self.files_and_dirs:
+    #                 if name.startswith(text[1]):
+    #                     yield Completion(name, start_position=-len(text[1]))
+    # def get_completions(self, document, complete_event):
+    #     text = document.text_before_cursor.strip().split()
+    #     if len(text) == 1:
+    #         for cmd in self.commands:
+    #             if cmd.startswith(text[0]):
+    #                 yield Completion(cmd, start_position=-len(text[0]))
+    #     elif len(text) == 2 and text[0] == 'run':
+    #         for subcmd in self.run_subcommands:
+    #             if subcmd.startswith(text[1]):
+    #                 yield Completion(subcmd, start_position=-len(text[1]))
+    #     elif len(text) == 2 and text[0] == 'load':
+    #         for name in self.files_and_dirs:
+    #             if name.startswith(text[1]):
+    #                 yield Completion(name, start_position=-len(text[1]))
 
 def start_interactive():
-    commands = ['create', 'load', 'save', 'list-modules', 'list-recipes', 'module-info', 'recipe-info', 'run-module', 'run-recipe', 'run-cmd']
-    completer = WordCompleter(commands, ignore_case=True)
-    session = PromptSession(completer=completer)
+    completer = CommandCompleter()
+    session = PromptSession(history=InMemoryHistory(), completer=completer)
 
     while True:
         try:
-            text = session.prompt('> ')
-            args = text.split()
-            if not args:
-                continue
-            parsed_args = parser.parse_args(args)
-            if hasattr(parsed_args, 'func'):
-                parsed_args.func(parsed_args)
+            command = session.prompt('> ')
+            if command.strip().lower() in ['exit', 'quit']:
+                break
+            args = parser.parse_args(command.split())
+            if hasattr(args, 'func'):
+                args.func(args)
             else:
-                print("Unknown command")
-        except KeyboardInterrupt:
-            break
+                print(f"Invalid command: {command}")
+                parser.print_help()
+        except argparse.ArgumentError as e:
+            print(f"Error: {e}")
+            parser.print_help()
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 def main():
     global parser
-    parser = argparse.ArgumentParser(description="CLI for workspace management and execution.")
+    parser = CustomArgumentParser(description="CLI for workspace management and execution.")
     subparsers = parser.add_subparsers()
 
     parser_create = subparsers.add_parser('create', help='Create a new workspace')
@@ -165,27 +238,67 @@ def main():
     parser_list_recipes = subparsers.add_parser('list-recipes', help='List available recipes')
     parser_list_recipes.set_defaults(func=list_recipes)
 
-    parser_module_info = subparsers.add_parser('module-info', help='Get info about a specific module')
+    # parser_module_info = subparsers.add_parser('module-info', help='Get info about a specific module')
+    # parser_module_info.add_argument('module_name', type=str, help='The name of the module')
+    # parser_module_info.set_defaults(func=module_info)
+
+    # parser_recipe_info = subparsers.add_parser('recipe-info', help='Get info about a specific recipe')
+    # parser_recipe_info.add_argument('recipe_name', type=str, help='The name of the recipe')
+    # parser_recipe_info.set_defaults(func=recipe_info)
+
+    # parser_run_module = subparsers.add_parser('run-module', help='Run a specific module')
+    # parser_run_module.add_argument('module_name', type=str, help='The name of the module')
+    # parser_run_module.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the module')
+    # parser_run_module.set_defaults(func=run_module)
+
+    # parser_run_recipe = subparsers.add_parser('run-recipe', help='Run a specific recipe')
+    # parser_run_recipe.add_argument('recipe_name', type=str, help='The name of the recipe')
+    # parser_run_recipe.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the recipe')
+    # parser_run_recipe.set_defaults(func=run_recipe)
+
+    # parser_run_os_command = subparsers.add_parser('run-cmd', help='Run an OS command')
+    # parser_run_os_command.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the command')
+    # parser_run_os_command.set_defaults(func=run_os_command)
+
+    # Info commands
+    parser_info = subparsers.add_parser('info', help='Get info about a specific entity')
+    info_subparsers = parser_info.add_subparsers(dest='info_type')
+
+    parser_module_info = info_subparsers.add_parser('module', help='Get info about a specific module')
     parser_module_info.add_argument('module_name', type=str, help='The name of the module')
     parser_module_info.set_defaults(func=module_info)
 
-    parser_recipe_info = subparsers.add_parser('recipe-info', help='Get info about a specific recipe')
+    parser_recipe_info = info_subparsers.add_parser('recipe', help='Get info about a specific recipe')
     parser_recipe_info.add_argument('recipe_name', type=str, help='The name of the recipe')
     parser_recipe_info.set_defaults(func=recipe_info)
 
-    parser_run_module = subparsers.add_parser('run-module', help='Run a specific module')
+    # Run commands
+    parser_run = subparsers.add_parser('run', help='Run a specific entity')
+    run_subparsers = parser_run.add_subparsers(dest='run_type')
+
+    parser_run_module = run_subparsers.add_parser('module', help='Run a specific module')
     parser_run_module.add_argument('module_name', type=str, help='The name of the module')
     parser_run_module.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the module')
     parser_run_module.set_defaults(func=run_module)
 
-    parser_run_recipe = subparsers.add_parser('run-recipe', help='Run a specific recipe')
+    parser_run_recipe = run_subparsers.add_parser('recipe', help='Run a specific recipe')
     parser_run_recipe.add_argument('recipe_name', type=str, help='The name of the recipe')
     parser_run_recipe.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the recipe')
     parser_run_recipe.set_defaults(func=run_recipe)
 
-    parser_run_os_command = subparsers.add_parser('run-cmd', help='Run an OS command')
+    parser_run_os_command = run_subparsers.add_parser('cmd', help='Run an OS command')
     parser_run_os_command.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the command')
     parser_run_os_command.set_defaults(func=run_os_command)
+
+    # List commands
+    parser_list = subparsers.add_parser('list', help='List specific entities')
+    list_subparsers = parser_list.add_subparsers(dest='list_type')
+
+    parser_list_modules = list_subparsers.add_parser('module', help='List all modules')
+    parser_list_modules.set_defaults(func=list_modules)
+
+    parser_list_recipes = list_subparsers.add_parser('recipe', help='List all recipes')
+    parser_list_recipes.set_defaults(func=list_recipes)
 
     parser_interactive = subparsers.add_parser('interactive', help='Start interactive mode')
     parser_interactive.set_defaults(func=lambda args: start_interactive())
@@ -197,35 +310,7 @@ def main():
         if hasattr(args, 'func'):
             args.func(args)
         else:
-            parse_command(' '.join(sys.argv[1:]))
-
-    if len(sys.argv) > 1:
-        command = sys.argv[1]
-        if command == "load" and len(sys.argv) == 3:
-            args = argparse.Namespace(name=sys.argv[2])
-            load_workspace_cmd(args=args)
-
-    cli_completer = WordCompleter(['create', 'load', 'save', 'exit'], ignore_case=True)
-
-    session = PromptSession(history=InMemoryHistory(), completer=cli_completer)
-    while True:
-        try:
-            line = session.prompt('> ')
-            if line.startswith("create "):
-                args = line.split()
-                create_workspace_cmd(argparse.Namespace(name=args[1]))
-            elif line.startswith("load "):
-                args = line.split()
-                load_workspace_cmd(argparse.Namespace(name=args[1]))
-            elif line.startswith("save"):
-                save_workspace_cmd()
-            elif line == "exit":
-                break
-        except KeyboardInterrupt:
-            break
-        except Exception as e:
-            print(f"Error: {e}")
+            parser.print_help()
 
 if __name__ == "__main__":
     main()
-
