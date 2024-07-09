@@ -1,0 +1,22 @@
+{
+    "$schema": "./schema.json",
+    "module": {
+        "type": "external",
+        "name": "ipinfo"
+    },
+    "execution": {
+        "command": [
+            "curl",
+            "ipinfo.io/{input.0}"
+        ]
+    },
+    "prepare-module-directory": true,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

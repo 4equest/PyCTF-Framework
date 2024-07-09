@@ -18,7 +18,11 @@ class Module:
         self.module_json = None
         self.module_list = self.get_module_list()
         self.module_name = module_name
-        self.module_path = next((file for file, name in self.module_list if name == self.module_name))
+        if self.module_name in self.module_list:
+            self.module_path = self.module_list[module_name]
+        else:
+            raise Exception(f"Error: {module_name} is not found.")
+        
         self.variables = {}
         
         with open(os.path.join("modules/json", self.module_path), 'r') as f:
@@ -64,15 +68,15 @@ class Module:
     
     def get_result(self):
         stdout, stderr = self.shell.stdout, self.shell.stderr
-        print(stdout, stderr)
+        # print(stdout, stderr)
         self.variables["output"] = []
         try:
             json_output = json.loads(stdout.decode())
             self.variables["output"] = json_output
         except json.JSONDecodeError:
-            print("stdout is not in valid JSON format")
+            # print("stdout is not in valid JSON format")
             self.variables["output"].append(stdout.decode())
-            print(stdout.decode())
+            # print(stdout.decode())
             
         return self.variables["output"]
     
@@ -86,7 +90,7 @@ class Module:
         
     @staticmethod
     def get_module_list() -> list:
-        module_list = []
+        module_list = {}
         for file in os.listdir('modules/json'):
             if file.endswith('.json'):
                 if file == 'schema.json':
@@ -95,7 +99,7 @@ class Module:
                     try:
                         module_json = json.load(f)
                         jsonschema.validate(module_json, json.load(open('modules/json/schema.json')))
-                        module_list.append((file, module_json['module']["name"]))
+                        module_list[module_json['module']["name"]] = file
                     except json.JSONDecodeError:
                         print(f'{file} is invalid json')
                     except jsonschema.exceptions.ValidationError as e:

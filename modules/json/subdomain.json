@@ -1,0 +1,23 @@
+
+{
+    "$schema": "./schema.json",
+    "module": {
+        "type": "external",
+        "name": "subdomain"
+    },
+    "execution": {
+        "command": [
+            "curl",
+            "https://api.subdomain.center/?domain={input.0}"
+        ]
+    },
+    "prepare-module-directory": true,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}
