@@ -21,7 +21,8 @@ class Module:
         if self.module_name in self.module_list:
             self.module_path = self.module_list[module_name]
         else:
-            Exception(f"Error: {module_name} is not found.")
+            raise(f"Error: {module_name} is not found.")
+        
         self.variables = {}
         
         with open(os.path.join("modules/json", self.module_path), 'r') as f:
