@@ -1,9 +1,16 @@
 import argparse
 import sys
 import os
+import glob
+import html
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
-from prompt_toolkit.completion import Completer, Completion, WordCompleter
+from prompt_toolkit.completion import Completer, Completion, WordCompleter, NestedCompleter
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.validation import Validator, ValidationError
+from prompt_toolkit.shortcuts import prompt
+from prompt_toolkit import HTML
+from prompt_toolkit.styles import Style
 
 # Ensure the parent directories are in the path for importing
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
@@ -149,7 +156,6 @@ class CommandCompleter(Completer):
         current_dir = os.getcwd()
         return [f for f in os.listdir(current_dir) if os.path.isdir(os.path.join(current_dir, f)) or os.path.isfile(os.path.join(current_dir, f))]
 
-    # 直前に補完された引数が補完されるのか？
     def get_completions(self, document, complete_event):
         text = document.text_before_cursor.strip().split()
         if len(text) == 1:
@@ -165,48 +171,61 @@ class CommandCompleter(Completer):
                 for name in self.files_and_dirs:
                     if name.startswith(text[1]):
                         yield Completion(name, start_position=-len(text[1]))
-    # def get_completions(self, document, complete_event):
-    #     text = document.text_before_cursor.strip().split()
-    #     if len(text) == 1:
-    #         for cmd in self.commands:
-    #             if cmd.startswith(text[0]):
-    #                 yield Completion(cmd, start_position=-len(text[0]))
-    #     elif len(text) == 2:
-    #         if text[0] == 'run':
-    #             for subcmd in self.run_subcommands:
-    #                 if subcmd.startswith(text[1]):
-    #                     yield Completion(subcmd, start_position=-len(text[1]))
-    #         elif text[0] == 'load':
-    #             for name in self.files_and_dirs:
-    #                 if name.startswith(text[1]):
-    #                     yield Completion(name, start_position=-len(text[1]))
-    # def get_completions(self, document, complete_event):
-    #     text = document.text_before_cursor.strip().split()
-    #     if len(text) == 1:
-    #         for cmd in self.commands:
-    #             if cmd.startswith(text[0]):
-    #                 yield Completion(cmd, start_position=-len(text[0]))
-    #     elif len(text) == 2 and text[0] == 'run':
-    #         for subcmd in self.run_subcommands:
-    #             if subcmd.startswith(text[1]):
-    #                 yield Completion(subcmd, start_position=-len(text[1]))
-    #     elif len(text) == 2 and text[0] == 'load':
-    #         for name in self.files_and_dirs:
-    #             if name.startswith(text[1]):
-    #                 yield Completion(name, start_position=-len(text[1]))
+
+def get_json_files(directory):
+    return [os.path.basename(f) for f in glob.glob(os.path.join(directory, '*.json'))]
 
 def start_interactive():
-    completer = CommandCompleter()
+    modules = get_json_files('../modules/json')
+    recipes = get_json_files('../recipes')
+    workspaces = get_json_files('../workspace')
+
+    completer = NestedCompleter.from_nested_dict({
+        'create': None,
+        'load': {'workspace': {workspace: None for workspace in workspaces}},
+        'run': {
+            'module': {module: None for module in modules},
+            'recipe': {recipe: None for recipe in recipes},
+            'cmd': {
+                'ls': {'../workspace', '../modules', '../recipes'},
+            }
+        },
+        'list': {
+            'module': None,
+            'recipe': None,
+        },
+        'info': {
+            'module': {module: None for module in modules},
+            'recipe': {recipe: None for recipe in recipes},
+        },
+        'save': None,
+        'exit': None,
+        'quit': None,
+    })
+    
     session = PromptSession(history=InMemoryHistory(), completer=completer)
+
+    style = Style.from_dict({
+        'prompt': 'ansiblue'
+    })
+    # completer = CommandCompleter()
+    session = PromptSession(history=InMemoryHistory(), completer=completer)
+
+    style = Style.from_dict({
+        'prompt': 'ansiblue'
+    })
 
     while True:
         try:
-            command = session.prompt('> ')
+            # escaped_workspace = html.escape(str(current_workspace) or "")
+            command = session.prompt(HTML(f'<prompt>> </prompt>'), style=style)
+            # command = session.prompt('> ')
             if command.strip().lower() in ['exit', 'quit']:
                 break
             args = parser.parse_args(command.split())
             if hasattr(args, 'func'):
                 args.func(args)
+                # escaped_workspace = html.escape(str(current_workspace) or "")
             else:
                 print(f"Invalid command: {command}")
                 parser.print_help()
