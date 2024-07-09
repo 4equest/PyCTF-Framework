@@ -6,9 +6,9 @@ from dataclasses import dataclass
 
 class WorkSpace:
     def __init__(self,
-                module_state = [], # モジュール ID(連番とか) 実行状態 モジュールは実行後に破棄してoutputだけ保持しておくべき
-                recipe_state = [], # レシピ ID(連番とか) 実行状態 レシピは実行後に破棄してoutputだけ保持しておくべき
-                cmd_state = [],
+                module_state = {}, # モジュール ID(連番とか) 実行状態 モジュールは実行後に破棄してoutputだけ保持しておくべき
+                recipe_state = {}, # レシピ ID(連番とか) 実行状態 レシピは実行後に破棄してoutputだけ保持しておくべき
+                cmd_state = {},
                 workspace_name = "default_workspace",
                 workspace_id = "workspace-" + str(uuid.uuid4()),
                 #workspace_path = "./default_workspace.json",
@@ -34,12 +34,11 @@ class WorkSpace:
         module = Module(module_name)
         module.run(args)
         module_id = self.get_next_module_id()
-        self.module_state.append({
-            module_id:{
+        self.module_state[module_id] = {
                 "module" : module,
                 "running": False, # syncなのでFalse
                 "output" : []
-            }})
+            }
         
         return module_id
         
@@ -85,12 +84,11 @@ class WorkSpace:
         recipe = Recipe(recipe_name)
         recipe.run(args)
         recipe_id = self.get_next_recipe_id()
-        self.recipe_state.append({
-            recipe_id:{
+        self.recipe_state[recipe]={
                 "recipe" : recipe,
                 "running": False,
                 "output" : []
-            }})
+            }
         
         return recipe_id
     
