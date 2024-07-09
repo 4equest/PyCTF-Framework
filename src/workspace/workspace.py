@@ -84,7 +84,7 @@ class WorkSpace:
         recipe = Recipe(recipe_name)
         recipe.run(args)
         recipe_id = self.get_next_recipe_id()
-        self.recipe_state[recipe]={
+        self.recipe_state[recipe_id]={
                 "recipe" : recipe,
                 "running": False,
                 "output" : []
