@@ -11,7 +11,11 @@ class Recipe:
         self.recipe_json = None
         self.recipe_list = self.get_recipe_list()
         self.recipe_name = recipe_name
-        self.recipe_path = next((file for file, name in self.recipe_list if name == self.recipe_name))
+        if self.recipe_name in self.recipe_list:
+            self.recipe_path = self.recipe_list[recipe_name]
+        else:
+            Exception(f"Error: {recipe_name} is not found.")
+            
         self.variables = {}
         with open(os.path.join("recipes", self.recipe_path), 'r') as f:
             self.recipe_json = json.load(f)
@@ -50,8 +54,8 @@ class Recipe:
         pass
     
     @staticmethod
-    def get_recipe_list() -> list:
-        recipe_list = []
+    def get_recipe_list() -> dict:
+        recipe_list = {}
         for file in os.listdir('recipes'):
             if file.endswith('.json'):
                 if file == 'schema.json':
@@ -60,7 +64,7 @@ class Recipe:
                     try:
                         recipe_json = json.load(f)
                         jsonschema.validate(recipe_json, json.load(open('recipes/schema.json')))
-                        recipe_list.append((file, recipe_json['recipe-name']))
+                        recipe_list[recipe_json['recipe-name']] = file
                     except json.JSONDecodeError:
                         print(f'{file} is invalid json')
                     except jsonschema.exceptions.ValidationError as e:

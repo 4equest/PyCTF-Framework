@@ -18,7 +18,10 @@ class Module:
         self.module_json = None
         self.module_list = self.get_module_list()
         self.module_name = module_name
-        self.module_path = next((file for file, name in self.module_list if name == self.module_name))
+        if self.module_name in self.module_list:
+            self.module_path = self.module_list[module_name]
+        else:
+            Exception(f"Error: {module_name} is not found.")
         self.variables = {}
         
         with open(os.path.join("modules/json", self.module_path), 'r') as f:
@@ -86,7 +89,7 @@ class Module:
         
     @staticmethod
     def get_module_list() -> list:
-        module_list = []
+        module_list = {}
         for file in os.listdir('modules/json'):
             if file.endswith('.json'):
                 if file == 'schema.json':
@@ -95,7 +98,7 @@ class Module:
                     try:
                         module_json = json.load(f)
                         jsonschema.validate(module_json, json.load(open('modules/json/schema.json')))
-                        module_list.append((file, module_json['module']["name"]))
+                        module_list[module_json['module']["name"]] = file
                     except json.JSONDecodeError:
                         print(f'{file} is invalid json')
                     except jsonschema.exceptions.ValidationError as e:
