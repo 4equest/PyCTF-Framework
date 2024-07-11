@@ -21,7 +21,7 @@ class Module:
         if self.module_name in self.module_list:
             self.module_path = self.module_list[module_name]
         else:
-            raise Exception(f"Error: {module_name} is not found.")
+            raise KeyError(f"Error: {module_name} is not found.")
         
         self.variables = {}
         
@@ -107,3 +107,18 @@ class Module:
                     except jsonschema.exceptions.ValidationError as e:
                         print(f'{file} is invalid json schema')
         return module_list
+    
+    @staticmethod
+    def get_module_info(module_name: str) -> str:
+        module_list = Module.get_module_list()
+        if not module_name in module_list:
+            raise KeyError(f"{module_name} is not found.")
+        
+        with open(os.path.join("modules/json", module_list[module_name]), 'r') as f:
+            module_json = json.load(f)
+        
+        if not "description" in module_json:
+            raise KeyError(f"{module_name} has no description.")
+        
+        return module_json["description"]
+        

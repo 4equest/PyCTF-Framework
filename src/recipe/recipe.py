@@ -14,7 +14,7 @@ class Recipe:
         if self.recipe_name in self.recipe_list:
             self.recipe_path = self.recipe_list[recipe_name]
         else:
-            raise Exception(f"Error: {recipe_name} is not found.")
+            raise KeyError(f"Error: {recipe_name} is not found.")
             
         self.variables = {}
         with open(os.path.join("recipes", self.recipe_path), 'r') as f:
@@ -73,3 +73,17 @@ class Recipe:
                     except jsonschema.exceptions.ValidationError as e:
                         print(f'{file} is invalid json schema')
         return recipe_list
+    
+    @staticmethod
+    def get_recipe_info(recipe_name: str) -> str:
+        recipe_list = Recipe.get_recipe_list()
+        if not recipe_name in recipe_list:
+            raise KeyError(f"{recipe_name} is not found.")
+        
+        with open(os.path.join("recipes", recipe_list[recipe_name]), 'r') as f:
+            recipe_json = json.load(f)
+        
+        if not "description" in recipe_json:
+            raise KeyError(f"{recipe_name} has no description.")
+        
+        return recipe_json["description"]

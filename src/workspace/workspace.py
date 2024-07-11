@@ -76,9 +76,9 @@ class WorkSpace:
     def get_module_list(self) -> list:
         return Module.get_module_list()
     
-    def get_module_info(modulename: str) -> object:
-        # todo descriptionなどを返せたらいいな
-        pass
+    @staticmethod
+    def get_module_info(modulename: str) -> str:
+        return Module.get_module_info(modulename)
             
     def run_recipe(self, recipe_name: str, args: list) -> str:
         recipe = Recipe(recipe_name)
@@ -115,9 +115,9 @@ class WorkSpace:
     def get_recipe_list(self) -> list:
         return Recipe.get_recipe_list()
 
-    def get_recipe_info(recipe_name: str) -> object:
-        # todo descriptionなどを返せたらいいな
-        pass
+    @staticmethod
+    def get_recipe_info(recipe_name: str) -> str:
+        return Recipe.get_recipe_info(recipe_name)
     
     def run_cmd(self, args: list) -> str:
         pass
