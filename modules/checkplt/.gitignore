@@ -159,12 +159,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# junk
-memo.txt
-test_*.py
-test_*.json
+# test file
 hack*
 my_hack*
-
-# workspace save data
-/workspace

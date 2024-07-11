@@ -29,6 +29,8 @@ class Module:
             self.module_json = json.load(f)
         if self.module_json['prepare-module-directory']:
             self.variables["module_dir"] = utils.get_temp_folder()
+            
+        self.variables["cwd"] = os.getcwd()
         
     def run(self, args: list) -> None:
         # モジュール内変数の準備
@@ -57,9 +59,9 @@ class Module:
                 elif not os.path.isfile(requirements_path):
                     raise("requirements.txt is not found")
                 activate_script = os.path.join(venv_path, 'bin', 'activate')
-                execution_command = f"source {activate_script} && " + execution_command
-            
-            self.shell = subprocess.run(execution_command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+                subprocess.run(f"source {activate_script} && pip install -r {requirements_path} > /dev/null 2>&1", shell=True, executable="/bin/bash")
+                execution_command = f"source {activate_script} && {execution_command}"
+            self.shell = subprocess.run(execution_command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True, executable="/bin/bash")
 
         return
         
