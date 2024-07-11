@@ -21,7 +21,7 @@ class Module:
         if self.module_name in self.module_list:
             self.module_path = self.module_list[module_name]
         else:
-            raise Exception(f"Error: {module_name} is not found.")
+            raise KeyError(f"Error: {module_name} is not found.")
         
         self.variables = {}
         
@@ -38,17 +38,17 @@ class Module:
         for arg_count, arg  in enumerate(args):
             self.variables["input"].append(arg)
         
-        if self.module_json['module']["type"] == "built-in":
-            if self.module_json['module']["method"] == "class":
+        if self.module_json["type"] == "built-in":
+            if self.module_json["method"] == "class":
                 #todo 何かしらの.pyを読み込んでインスタンスを作成しrunメソッドを実行する
                 pass
                 
                 
-            elif self.module_json['module']["method"] == "function":
+            elif self.module_json["method"] == "function":
                 #todo 何かしらの.pyを読み込んで指定された関数を実行する
                 pass
             
-        elif self.module_json['module']["type"] == "external":
+        elif self.module_json["type"] == "external":
             execution_command = self.get_execution_command()
             
             if "environment" in self.module_json['execution'] and self.module_json['execution']["environment"]["type"] == "venv":
@@ -101,9 +101,24 @@ class Module:
                     try:
                         module_json = json.load(f)
                         jsonschema.validate(module_json, json.load(open('modules/json/schema.json')))
-                        module_list[module_json['module']["name"]] = file
+                        module_list[module_json["name"]] = file
                     except json.JSONDecodeError:
                         print(f'{file} is invalid json')
                     except jsonschema.exceptions.ValidationError as e:
                         print(f'{file} is invalid json schema')
         return module_list
+    
+    @staticmethod
+    def get_module_info(module_name: str) -> str:
+        module_list = Module.get_module_list()
+        if not module_name in module_list:
+            raise KeyError(f"{module_name} is not found.")
+        
+        with open(os.path.join("modules/json", module_list[module_name]), 'r') as f:
+            module_json = json.load(f)
+        
+        if not "description" in module_json:
+            raise KeyError(f"{module_name} has no description.")
+        
+        return module_json["description"]
+        

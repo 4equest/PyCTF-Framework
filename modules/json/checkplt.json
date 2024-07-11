@@ -1,9 +1,9 @@
 {
     "$schema": "./schema.json",
-    "module": {
         "type": "external",
         "name": "checkplt"
-    },
+    ,
+    "description": "Check elf file for detection of tampered linking",
     "execution": {
         "environment": {
             "type": "venv"

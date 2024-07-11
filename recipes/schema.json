@@ -5,7 +5,10 @@
         "$schema": {
             "type": "string"
         },
-        "recipe-name": {
+        "name": {
+            "type": "string"
+        },
+        "description": {
             "type": "string"
         },
         "prepare-recipe-directory": {
@@ -45,7 +48,7 @@
         }
     },
     "required": [
-        "recipe-name",
+        "name",
         "prepare-recipe-directory",
         "modules",
         "output"
