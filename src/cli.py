@@ -1,18 +1,27 @@
 import argparse
 import sys
 import os
+import glob
+from io import StringIO
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
-from prompt_toolkit.completion import WordCompleter
-
-# Ensure the parent directories are in the path for importing
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+from prompt_toolkit.completion import Completer, Completion, WordCompleter, NestedCompleter
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.validation import Validator, ValidationError
+from prompt_toolkit.shortcuts import prompt
+from prompt_toolkit.styles import Style
 
 from workspace.manager import create_workspace, save_workspace, load_workspace_unsafe, save_workspace_unsafe
 from workspace.workspace import WorkSpace
 
 current_workspace = None
-parser = None
+
+class CustomArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        raise argparse.ArgumentError(None, message)
+
+    def print_help(self, file=None):
+        super().print_help(file)
 
 def set_workspace_name(name):
     global current_workspace_name
@@ -30,6 +39,8 @@ def create_workspace_cmd(args):
     current_workspace = create_workspace(args.name)
     save_workspace_unsafe(current_workspace, args.name)
     print(f"Workspace '{args.name}' created and saved.")
+    workspace = get_files('./workspace')
+    return workspace
 
 def load_workspace_cmd(args):
     global current_workspace
@@ -40,15 +51,14 @@ def save_workspace_cmd(args):
     global current_workspace
     if current_workspace is None:
         print("No workspace loaded.")
-        return
+        current_workspace = create_workspace("No workspace")
     save_workspace_unsafe(current_workspace, current_workspace.workspace_name)
     print(f"Workspace '{current_workspace.workspace_name}' saved.")
 
 def list_modules(args):
     global current_workspace
     if current_workspace is None:
-        print("No workspace loaded.")
-        return
+        current_workspace = create_workspace("No workspace")
     modules = current_workspace.get_module_list()
     for module in modules:
         print(module)
@@ -56,8 +66,7 @@ def list_modules(args):
 def list_recipes(args):
     global current_workspace
     if current_workspace is None:
-        print("No workspace loaded.")
-        return
+        current_workspace = create_workspace("No workspace")
     recipes = current_workspace.get_recipe_list()
     for recipe in recipes:
         print(recipe)
@@ -65,8 +74,7 @@ def list_recipes(args):
 def module_info(args):
     global current_workspace
     if current_workspace is None:
-        print("No workspace loaded.")
-        return
+        current_workspace = create_workspace("No workspace")
     info = current_workspace.get_module_info(args.module_name)
     if info:
         print(info)
@@ -76,8 +84,7 @@ def module_info(args):
 def recipe_info(args):
     global current_workspace
     if current_workspace is None:
-        print("No workspace loaded.")
-        return
+        current_workspace = create_workspace("No workspace")
     info = current_workspace.get_recipe_info(args.recipe_name)
     if info:
         print(info)
@@ -112,6 +119,7 @@ def run_os_command(args):
     global current_workspace
     if current_workspace is None:
         print("No workspace loaded.")
+        current_workspace = create_workspace("No workspace")
         return
     cmd_id = current_workspace.run_cmd(args.args)
     result = current_workspace.get_cmd_result(cmd_id)
@@ -124,28 +132,84 @@ def parse_command(command):
     else:
         print("Invalid command")
 
-def start_interactive():
-    commands = ['create', 'load', 'save', 'list-modules', 'list-recipes', 'module-info', 'recipe-info', 'run-module', 'run-recipe', 'run-cmd']
-    completer = WordCompleter(commands, ignore_case=True)
-    session = PromptSession(completer=completer)
+""" def get_json_files(directory):
+    return [os.path.basename(f) for f in glob.glob(os.path.join(directory, '*.json'))] """
 
+def get_files(directory):
+    return [os.path.basename(f) for f in glob.glob(os.path.join(directory, '*'))]
+
+def get_module_list():
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+    list_modules(None)
+    output = sys.stdout.getvalue()
+    sys.stdout = old_stdout
+    return output.splitlines()
+
+def get_recipe_list():
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+    list_recipes(None)
+    output = sys.stdout.getvalue()
+    sys.stdout = old_stdout
+    return output.splitlines()
+
+def start_interactive(parser):
+    modules = get_module_list()
+    recipes = get_recipe_list()
+    workspaces = get_files('./workspace')
+
+    completer = NestedCompleter.from_nested_dict({
+        'create': None,
+        'load': {workspace: None for workspace in workspaces},
+        'run': {
+            'module': {module: None for module in modules},
+            'recipe': {recipe: None for recipe in recipes},
+            'cmd': {
+                'ls': None, 
+            }
+        },
+        'list': {
+            'module': None,
+            'recipe': None,
+        },
+        'info': {
+            'module': {module: None for module in modules},
+            'recipe': {recipe: None for recipe in recipes},
+        },
+        'save': None,
+        'exit': None,
+        'quit': None,
+    })
+    
+    session = PromptSession(history=InMemoryHistory(), completer=completer)
+
+    style = Style.from_dict({
+        'prompt': 'ansiblue',
+        'rprompt': 'bg:#fD0DD0 #ffffff',
+    })
+    
+    def status_line():
+        return 'To exit Ctrl+C or type "exit" or "quit"'
+    
     while True:
         try:
-            text = session.prompt('> ')
-            args = text.split()
-            if not args:
-                continue
-            parsed_args = parser.parse_args(args)
-            if hasattr(parsed_args, 'func'):
-                parsed_args.func(parsed_args)
+            workspace_name = current_workspace.workspace_name if current_workspace else "No workspace"
+            command = session.prompt(f'{workspace_name}> ', bottom_toolbar=status_line, style=style)
+            if command.strip().lower() in ['exit', 'quit']:
+                break
+            args = parser.parse_args(command.split())
+            if hasattr(args, 'func'):
+                args.func(args)
             else:
-                print("Unknown command")
-        except KeyboardInterrupt:
-            break
+                print(f"Invalid command: {command}")
+        except argparse.ArgumentError as e:
+            print(f"Error: {e}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 def main():
-    global parser
-    parser = argparse.ArgumentParser(description="CLI for workspace management and execution.")
+    parser = CustomArgumentParser(description="CLI for workspace management and execution.")
     subparsers = parser.add_subparsers()
 
     parser_create = subparsers.add_parser('create', help='Create a new workspace')
@@ -159,39 +223,45 @@ def main():
     parser_save = subparsers.add_parser('save', help='Save the current workspace')
     parser_save.set_defaults(func=save_workspace_cmd)
 
-    parser_list_modules = subparsers.add_parser('list-modules', help='List available modules')
-    parser_list_modules.set_defaults(func=list_modules)
+    parser_info = subparsers.add_parser('info', help='Get info about a specific entity')
+    info_subparsers = parser_info.add_subparsers(dest='info_type')
 
-    parser_list_recipes = subparsers.add_parser('list-recipes', help='List available recipes')
-    parser_list_recipes.set_defaults(func=list_recipes)
-
-    parser_module_info = subparsers.add_parser('module-info', help='Get info about a specific module')
+    parser_module_info = info_subparsers.add_parser('module', help='Get info about a specific module')
     parser_module_info.add_argument('module_name', type=str, help='The name of the module')
     parser_module_info.set_defaults(func=module_info)
 
-    parser_recipe_info = subparsers.add_parser('recipe-info', help='Get info about a specific recipe')
+    parser_recipe_info = info_subparsers.add_parser('recipe', help='Get info about a specific recipe')
     parser_recipe_info.add_argument('recipe_name', type=str, help='The name of the recipe')
     parser_recipe_info.set_defaults(func=recipe_info)
 
-    parser_run_module = subparsers.add_parser('run-module', help='Run a specific module')
+    parser_run = subparsers.add_parser('run', help='Run a specific entity')
+    run_subparsers = parser_run.add_subparsers(dest='run_type')
+
+    parser_run_module = run_subparsers.add_parser('module', help='Run a specific module')
     parser_run_module.add_argument('module_name', type=str, help='The name of the module')
     parser_run_module.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the module')
     parser_run_module.set_defaults(func=run_module)
 
-    parser_run_recipe = subparsers.add_parser('run-recipe', help='Run a specific recipe')
+    parser_run_recipe = run_subparsers.add_parser('recipe', help='Run a specific recipe')
     parser_run_recipe.add_argument('recipe_name', type=str, help='The name of the recipe')
     parser_run_recipe.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the recipe')
     parser_run_recipe.set_defaults(func=run_recipe)
 
-    parser_run_os_command = subparsers.add_parser('run-cmd', help='Run an OS command')
+    parser_run_os_command = run_subparsers.add_parser('cmd', help='Run an OS command')
     parser_run_os_command.add_argument('args', nargs=argparse.REMAINDER, help='Arguments for the command')
     parser_run_os_command.set_defaults(func=run_os_command)
 
-    parser_interactive = subparsers.add_parser('interactive', help='Start interactive mode')
-    parser_interactive.set_defaults(func=lambda args: start_interactive())
+    parser_list = subparsers.add_parser('list', help='List specific entities')
+    list_subparsers = parser_list.add_subparsers(dest='list_type')
+
+    parser_list_modules = list_subparsers.add_parser('module', help='List all modules')
+    parser_list_modules.set_defaults(func=list_modules)
+
+    parser_list_recipes = list_subparsers.add_parser('recipe', help='List all recipes')
+    parser_list_recipes.set_defaults(func=list_recipes)
 
     if len(sys.argv) == 1:
-        start_interactive()
+        start_interactive(parser)
     else:
         args = parser.parse_args()
         if hasattr(args, 'func'):
@@ -204,27 +274,6 @@ def main():
         if command == "load" and len(sys.argv) == 3:
             args = argparse.Namespace(name=sys.argv[2])
             load_workspace_cmd(args=args)
-
-    cli_completer = WordCompleter(['create', 'load', 'save', 'exit'], ignore_case=True)
-
-    session = PromptSession(history=InMemoryHistory(), completer=cli_completer)
-    while True:
-        try:
-            line = session.prompt('> ')
-            if line.startswith("create "):
-                args = line.split()
-                create_workspace_cmd(argparse.Namespace(name=args[1]))
-            elif line.startswith("load "):
-                args = line.split()
-                load_workspace_cmd(argparse.Namespace(name=args[1]))
-            elif line.startswith("save"):
-                save_workspace_cmd()
-            elif line == "exit":
-                break
-        except KeyboardInterrupt:
-            break
-        except Exception as e:
-            print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
