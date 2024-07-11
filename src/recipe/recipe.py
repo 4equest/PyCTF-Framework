@@ -27,25 +27,32 @@ class Recipe:
         
         
     def run(self, args: list) -> None:
+        
         # レシピ内変数の準備
+        max_arg_num = utils.find_max_arg_num(json.dumps(self.recipe_json))
+        if max_arg_num is not None and max_arg_num > len(args):
+            raise Exception(f"Error: {module['name']} module/recipe requires {max_arg_num} arguments, but {len(args)} arguments are given.")
+
         self.variables["input"] = []
+        
         for arg_count, arg in enumerate(args):
             self.variables["input"].append(arg)
             
-        for module in self.recipe_json['modules']:
-            this_module = md.Module(module["module-name"])
-            #todo moduleに必要なモジュール変数を調べて取得して渡して実行
-            if len(module['arguments']) > len(args):
-                raise Exception(f"Error: {module['module-name']} module requires {len(module['arguments'])} arguments, but {len(args)} arguments are given.")
+        for module in self.recipe_json['execution-chain']:
             
+
             for arg_count, arg in enumerate(module['arguments']):
                 module['arguments'][arg_count] = utils.replace_template(self.variables, arg)
+                    
+            if module["type"] == "module":
+                this_execution = md.Module(module["name"])
+            elif module["type"] == "recipe":
+                this_execution = Recipe(module["name"])
                 
-            this_module.run(module['arguments'])
-            module_result = this_module.get_result()
-            self.variables[module["recipe-module-name"]] = {"output": []}
-            self.variables[module["recipe-module-name"]]["output"] = module_result
-            #self.modules.append(this_module)
+            this_execution.run(module['arguments'])
+            self.variables[module["inrecipe-name"]] = {"output": []}
+            self.variables[module["inrecipe-name"]]["output"] = this_execution.get_result()
+
             
     def get_result(self):
         self.variables["output"] = []

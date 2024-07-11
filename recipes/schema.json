@@ -14,16 +14,23 @@
         "prepare-recipe-directory": {
             "type": "boolean"
         },
-        "modules": {
+        "execution-chain": {
             "type": "array",
             "items": {
                 "type": "object",
                 "properties": {
-                    "module-name": {
+                    "name": {
                         "type": "string"
                     },
-                    "recipe-module-name": {
+                    "inrecipe-name": {
                         "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "module",
+                            "recipe"
+                        ]
                     },
                     "arguments": {
                         "type": "array",
@@ -33,8 +40,9 @@
                     }
                 },
                 "required": [
-                    "module-name",
-                    "recipe-module-name",
+                    "name",
+                    "inrecipe-name",
+                    "type",
                     "arguments"
                 ],
                 "additionalProperties": false
@@ -50,7 +58,7 @@
     "required": [
         "name",
         "prepare-recipe-directory",
-        "modules",
+        "execution-chain",
         "output"
     ],
     "additionalProperties": false
