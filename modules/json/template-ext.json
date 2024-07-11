@@ -1,9 +1,8 @@
 {
     "$schema": "./schema.json",
-    "module": {
-        "type": "external",
-        "name": "fuga"
-    },
+    "type": "external",
+    "name": "fuga",
+    "description": "sample external module",
     "execution": {
         "command": [
             "python",

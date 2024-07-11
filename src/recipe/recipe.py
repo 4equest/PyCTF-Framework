@@ -67,7 +67,7 @@ class Recipe:
                     try:
                         recipe_json = json.load(f)
                         jsonschema.validate(recipe_json, json.load(open('recipes/schema.json')))
-                        recipe_list[recipe_json['recipe-name']] = file
+                        recipe_list[recipe_json['name']] = file
                     except json.JSONDecodeError:
                         print(f'{file} is invalid json')
                     except jsonschema.exceptions.ValidationError as e:

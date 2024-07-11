@@ -1,6 +1,7 @@
 {
     "$schema": "./schema.json",
-    "recipe-name": "sample-recipe",
+    "name": "sample-recipe",
+    "description": "sample recipe",
     "prepare-recipe-directory": true,
     "modules": [
         {

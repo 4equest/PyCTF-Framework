@@ -1,10 +1,9 @@
 {
     "$schema": "./schema.json",
-    "module": {
-        "type": "built-in",
-        "name": "hoge",
-        "method": "class"
-    },
+    "type": "built-in",
+    "name": "hoge",
+    "method": "class",
+    "description": "sample builtin module",
     "execution": {
         "command": []
     },

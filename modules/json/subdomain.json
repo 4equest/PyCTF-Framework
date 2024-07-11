@@ -1,10 +1,8 @@
-
 {
     "$schema": "./schema.json",
-    "module": {
-        "type": "external",
-        "name": "subdomain"
-    },
+    "type": "external",
+    "name": "subdomain",
+    "description": "Get subdomain information from subdomain.center",
     "execution": {
         "command": [
             "curl",
