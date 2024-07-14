@@ -15,7 +15,7 @@
             "--json"
         ]
     },
-    "prepare-module-directory": true,
+    "prepare-module-directory": false,
     "data": {
         "input": {
             "type": "json"

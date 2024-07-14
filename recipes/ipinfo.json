@@ -1,0 +1,18 @@
+{
+    "$schema": "./schema.json",
+    "name": "ipinfo",
+    "prepare-recipe-directory": false,
+    "execution-chain": [
+        {
+            "name": "curl",
+            "type": "module",
+            "inrecipe-name": "curl",
+            "arguments": [
+                "ipinfo.io/{input.0}"
+            ]
+        }
+    ],
+    "output": [
+        "{curl.output}"
+    ]
+}

@@ -9,7 +9,7 @@
             "https://api.subdomain.center/?domain={input.0}"
         ]
     },
-    "prepare-module-directory": true,
+    "prepare-module-directory": false,
     "data": {
         "input": {
             "type": "json"

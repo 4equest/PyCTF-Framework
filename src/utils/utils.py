@@ -1,8 +1,15 @@
 import re
+import json
 import tempfile
 
 def get_temp_folder():
     return tempfile.mkdtemp()
+
+def find_max_arg_num(input_string):
+    pattern = r'\{input\.(\d+)\}'
+    matches = re.findall(pattern, input_string)
+    numbers = map(int, matches)
+    return max(numbers, default=None)
 
 def replace_template(variables, template):
     pattern = re.compile(r'\{(.+?)\}')
@@ -11,15 +18,15 @@ def replace_template(variables, template):
         path = match.group(1).split('.')
         value = variables
         for key in path:
-            # print(value)
-            # print(type(value))
             if isinstance(value, list):
                 key = int(key)
+                
             value = value[key]
         
-        if type(value) == dict:
-            return(str(value))
+        if type(value) == dict or type(value) == list:
+            value = json.dumps(value)
         return value
+    
     return pattern.sub(replacer, template)
 
 def filter_object(obj, allowed_types=(str, int, float, bool, list, dict, type(None))):
