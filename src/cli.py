@@ -2,6 +2,7 @@ import argparse
 import sys
 import os
 import glob
+import datetime
 from io import StringIO
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
@@ -16,12 +17,20 @@ from workspace.workspace import WorkSpace
 
 current_workspace = None
 
+class HelpRequested(Exception):
+    pass
+
 class CustomArgumentParser(argparse.ArgumentParser):
     def error(self, message):
         raise argparse.ArgumentError(None, message)
 
     def print_help(self, file=None):
-        super().print_help(file)
+        help_text = self.format_help()
+        help_text = help_text.replace("show this help message and exit", "show this help message")
+        if file is None:
+            file = sys.stdout
+        file.write(help_text)
+        raise HelpRequested()
 
 def set_workspace_name(name):
     global current_workspace_name
@@ -60,8 +69,11 @@ def list_modules(args):
     if current_workspace is None:
         current_workspace = create_workspace("No workspace")
     modules = current_workspace.get_module_list()
+    if modules is None:
+        modules = []
     for module in modules:
         print(module)
+    return modules
 
 def list_recipes(args):
     global current_workspace
@@ -70,6 +82,7 @@ def list_recipes(args):
     recipes = current_workspace.get_recipe_list()
     for recipe in recipes:
         print(recipe)
+    # return recipes
 
 def module_info(args):
     global current_workspace
@@ -132,27 +145,24 @@ def parse_command(command):
     else:
         print("Invalid command")
 
-""" def get_json_files(directory):
-    return [os.path.basename(f) for f in glob.glob(os.path.join(directory, '*.json'))] """
-
 def get_files(directory):
     return [os.path.basename(f) for f in glob.glob(os.path.join(directory, '*'))]
 
 def get_module_list():
-    old_stdout = sys.stdout
-    sys.stdout = StringIO()
-    list_modules(None)
-    output = sys.stdout.getvalue()
-    sys.stdout = old_stdout
-    return output.splitlines()
+    global current_workspace
+    if current_workspace is None:
+        current_workspace = create_workspace("No workspace")
+    modules = current_workspace.get_module_list()
+    if modules is None:
+        modules = []
+    return modules
 
 def get_recipe_list():
-    old_stdout = sys.stdout
-    sys.stdout = StringIO()
-    list_recipes(None)
-    output = sys.stdout.getvalue()
-    sys.stdout = old_stdout
-    return output.splitlines()
+    global current_workspace
+    if current_workspace is None:
+        current_workspace = create_workspace("No workspace")
+    recipes = current_workspace.get_recipe_list()
+    return recipes
 
 def start_interactive(parser):
     modules = get_module_list()
@@ -182,11 +192,16 @@ def start_interactive(parser):
         'quit': None,
     })
     
-    session = PromptSession(history=InMemoryHistory(), completer=completer)
+    session = PromptSession(history=InMemoryHistory(),auto_suggest=AutoSuggestFromHistory(), completer=completer)
+    now = datetime.datetime.now()
 
     style = Style.from_dict({
         'prompt': 'ansiblue',
         'rprompt': 'bg:#fD0DD0 #ffffff',
+        'completion-menu.completion': 'bg:#008888 #ffffff',
+        'completion-menu.completion.current': 'bg:#00aaaa #000000',
+        'scrollbar.background': 'bg:#88aaaa',
+        'scrollbar.button': 'bg:#222222',
     })
     
     def status_line():
@@ -195,7 +210,7 @@ def start_interactive(parser):
     while True:
         try:
             workspace_name = current_workspace.workspace_name if current_workspace else "No workspace"
-            command = session.prompt(f'{workspace_name}> ', bottom_toolbar=status_line, style=style)
+            command = session.prompt(f'{workspace_name}> ',rprompt= "%s:%s:%s" % (now.hour, now.minute, now.second), bottom_toolbar=status_line, style=style, mouse_support=True)
             if command.strip().lower() in ['exit', 'quit']:
                 break
             args = parser.parse_args(command.split())
@@ -203,10 +218,10 @@ def start_interactive(parser):
                 args.func(args)
             else:
                 print(f"Invalid command: {command}")
+        except HelpRequested:
+            continue
         except argparse.ArgumentError as e:
             print(f"Error: {e}")
-        except Exception as e:
-            print(f"An error occurred: {e}")
 
 def main():
     parser = CustomArgumentParser(description="CLI for workspace management and execution.")
