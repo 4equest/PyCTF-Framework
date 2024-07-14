@@ -3,7 +3,7 @@ import sys
 import os
 import glob
 import datetime
-from io import StringIO
+import traceback
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.completion import Completer, Completion, WordCompleter, NestedCompleter
@@ -221,7 +221,8 @@ def start_interactive(parser):
         except HelpRequested:
             continue
         except argparse.ArgumentError as e:
-            print(f"Error: {e}")
+            # print(f"Error: {e}")
+            traceback.print_exc()
 
 def main():
     parser = CustomArgumentParser(description="CLI for workspace management and execution.")
