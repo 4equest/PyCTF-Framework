@@ -20,6 +20,8 @@ class WorkSpace:
         self.workspace_id = workspace_id
         #self.workspace_path = workspace_path
         
+        self.variables = {}
+        
     def run_module(self, module_name: str, args: list) -> str:
         """
         モジュールの実行
@@ -31,7 +33,7 @@ class WorkSpace:
         Returns:
             str: モジュール実行id
         """
-        module = Module(module_name)
+        module = Module(module_name, dict(**self.module_state, **self.recipe_state))
         module.run(args)
         module_id = self.get_next_module_id()
         self.module_state[module_id] = {
@@ -81,9 +83,9 @@ class WorkSpace:
         return Module.get_module_info(modulename)
             
     def run_recipe(self, recipe_name: str, args: list) -> str:
-        recipe = Recipe(recipe_name)
-        recipe.run(args)
+        recipe = Recipe(recipe_name, dict(**self.module_state, **self.recipe_state))
         recipe_id = self.get_next_recipe_id()
+        recipe.run(args)
         self.recipe_state[recipe_id]={
                 "recipe" : recipe,
                 "running": False,
@@ -108,6 +110,12 @@ class WorkSpace:
         # del self.recipe_state[id]["recipe"] # レシピは実行後に破棄 todo 後で確認
         
         return self.recipe_state[id]["output"]
+    
+    def get_recipe_variables(self, id) -> object:
+        if id not in self.recipe_state:
+            raise KeyError("recipe_id: {} not found".format(id))
+        
+        return self.recipe_state[id]["recipe"].get_variables()
     
     def get_recipe_state_list(self) -> object:
         return self.recipe_state

@@ -5,11 +5,10 @@ import re
 import subprocess
 import json
 import jsonschema
-
 import utils
 
 class Module:
-    def __init__(self, module_name) -> None:
+    def __init__(self, module_name, states) -> None:
         """
         Args:
             module_name (_type_): 起動するモジュール名(NOTファイル名)
@@ -23,6 +22,7 @@ class Module:
         else:
             raise KeyError(f"Error: {module_name} is not found.")
         
+        self.states = states
         self.variables = {}
         
         with open(os.path.join("modules/json", self.module_path), 'r') as f:
@@ -36,6 +36,9 @@ class Module:
         # モジュール内変数の準備
         self.variables["input"] = []
         for arg_count, arg  in enumerate(args):
+            template_arg = utils.replace_template_nostr(self.states, arg)
+            if not template_arg is None:
+                arg = template_arg
             self.variables["input"].append(arg)
         
         if self.module_json["type"] == "built-in":

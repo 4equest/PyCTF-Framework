@@ -29,6 +29,22 @@ def replace_template(variables, template):
     
     return pattern.sub(replacer, template)
 
+def replace_template_nostr(variables: dict, template: str):
+    if not (template.startswith("{") and template.endswith("}")):
+        return None
+        
+    keys = template.strip("{}").split(".")
+    obj = variables.copy()
+    for key in keys:
+        try:
+            if isinstance(obj, list):  # json_objがリストの場合
+                key = int(key) 
+            obj = obj[key]
+        except (KeyError, IndexError, TypeError):
+            return None  # キーが存在しない場合はNoneを返す
+
+    return obj
+
 def filter_object(obj, allowed_types=(str, int, float, bool, list, dict, type(None))):
     """
     任意のオブジェクトからjsonに変換可能なオブジェクトのみを取り出す
