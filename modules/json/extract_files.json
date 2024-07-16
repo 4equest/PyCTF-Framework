@@ -1,0 +1,24 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "extract_files",
+    "description": "binwalkで解析したファイルシステムを抽出する",
+    "execution": {
+        "command": [
+            "binwalk",
+            "-e",
+            "{input.0}",
+            "-C",
+            "{input.1}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

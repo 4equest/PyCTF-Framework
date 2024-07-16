@@ -1,0 +1,23 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "hashcalc",
+    "description": "Calculate MD5, SHA1, SHA256 hashes of a file or text.",
+    "execution": {
+        "command": [
+            "python3",
+            "{cwd}/modules/hashcalc/hashcalc.py",
+            "{input.0}",
+            "{input.1}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

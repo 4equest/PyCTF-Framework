@@ -1,0 +1,22 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "objdump",
+    "description": "Display information from object files.",
+    "execution": {
+        "command": [
+            "objdump",
+            "-d",
+            "{input.0}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

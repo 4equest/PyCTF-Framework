@@ -1,0 +1,22 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "grep",
+    "description": "Search for patterns in input text.",
+    "execution": {
+        "command": [
+            "grep",
+            "{input.0}",
+            "{input.1}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

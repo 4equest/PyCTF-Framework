@@ -1,0 +1,23 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "base64encode",
+    "description": "Encode text to Base64.",
+    "execution": {
+        "command": [
+            "echo",
+            "{input.0}",
+            "|",
+            "base64"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}
