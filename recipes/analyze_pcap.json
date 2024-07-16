@@ -9,14 +9,7 @@
             "type": "module",
             "inrecipe-name": "http_packets",
             "arguments": [
-                "-r",
-                "{input.0}",
-                "-Y",
-                "http",
-                "-T",
-                "fields",
-                "-e",
-                "http.request_uri"
+                "-r　{input.0} -Y http -T fields -e http.request_uri"
             ]
         },
         {
