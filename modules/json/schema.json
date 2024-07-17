@@ -1,0 +1,144 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "type": {
+            "type": "string",
+            "enum": [
+                "built-in",
+                "external"
+            ]
+        },
+        "name": {
+            "type": "string"
+        },
+        "method": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "execution": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "environment": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "type"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "prepare-module-directory": {
+            "type": "boolean",
+            "additionalProperties": false
+        },
+        "data": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "file",
+                                "json"
+                            ]
+                        },
+                        "path": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "output": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "file",
+                                "json"
+                            ]
+                        },
+                        "path": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "input",
+                "output"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "type",
+        "name",
+        "execution",
+        "data"
+    ],
+    "additionalProperties": false,
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "module": {
+                        "properties": {
+                            "type": {
+                                "const": "built-in"
+                            }
+                        }
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "module": {
+                        "required": [
+                            "method"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "module": {
+                        "properties": {
+                            "type": {
+                                "const": "external"
+                            }
+                        }
+                    }
+                }
+            },
+            "then": {
+                "required": [
+                    "execution"
+                ]
+            }
+        }
+    ]
+}

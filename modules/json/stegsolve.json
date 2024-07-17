@@ -1,0 +1,23 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "stegsolve",
+    "description": "Analyze images for steganography using Stegsolve.",
+    "execution": {
+        "command": [
+            "java",
+            "-jar",
+            "{cwd}/modules/stegsolve/stegsolve.jar",
+            "{input.0}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

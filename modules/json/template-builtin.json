@@ -1,0 +1,19 @@
+{
+    "$schema": "./schema.json",
+    "type": "built-in",
+    "name": "hoge",
+    "method": "class",
+    "description": "sample builtin module",
+    "execution": {
+        "command": []
+    },
+    "prepare-module-directory": true,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

@@ -1,0 +1,24 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "base64decode",
+    "description": "Decode Base64 encoded text.",
+    "execution": {
+        "command": [
+            "echo",
+            "{input.0}",
+            "|",
+            "base64",
+            "-d"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

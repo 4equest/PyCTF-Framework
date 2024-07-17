@@ -1,0 +1,21 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "binwalk",
+    "description": "Analyze firmware images for embedded files and file systems.",
+    "execution": {
+        "command": [
+            "binwalk",
+            "{input.0}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

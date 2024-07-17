@@ -1,0 +1,28 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "fuga",
+    "description": "sample external module",
+    "execution": {
+        "command": [
+            "python",
+            "fuga.py",
+            "{input.0}",
+            "{module_dir}"
+        ],
+        "environment": {
+            "type": "venv"
+        }
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "file",
+            "path": "input_temp.json"
+        },
+        "output": {
+            "type": "file",
+            "path": "output_temp.json"
+        }
+    }
+}

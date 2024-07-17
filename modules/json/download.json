@@ -1,0 +1,22 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "download",
+    "description": "URLからファイルをダウンロードする",
+    "execution": {
+        "command": [
+            "wget",
+            "-P {input.1}",
+            "-i {input.0}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

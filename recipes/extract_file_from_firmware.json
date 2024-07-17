@@ -1,0 +1,29 @@
+{
+    "$schema": "./schema.json",
+    "name": "extract_file_from_firmware",
+    "description": "ファームウェアイメージからファイルを抽出する",
+    "prepare-recipe-directory": true,
+    "execution-chain": [
+        {
+            "name": "binwalk",
+            "type": "module",
+            "inrecipe-name": "binwalk_result",
+            "arguments": [
+                "{input.0}"
+            ]
+        },
+        {
+            "name": "extract_files",
+            "type": "module",
+            "inrecipe-name": "extracted_files",
+            "arguments": [
+                "{input.0}",
+                "{recipe_dir}"
+            ]
+        }
+    ],
+    "output": [
+        "{binwalk_result.output.0}",
+        "{extracted_files.output.0}"
+    ]
+}

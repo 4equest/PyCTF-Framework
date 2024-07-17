@@ -1,0 +1,21 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "file",
+    "description": "Get file information using the 'file' command.",
+    "execution": {
+        "command": [
+            "file",
+            "{input.0}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

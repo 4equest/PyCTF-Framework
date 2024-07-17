@@ -1,0 +1,46 @@
+{
+    "$schema": "./schema.json",
+    "name": "forensics_1",
+    "description": "Forensic analysis",
+    "prepare-recipe-directory": true,
+    "execution-chain": [
+        {
+            "name": "exiftool",
+            "type": "module",
+            "inrecipe-name": "exiftool_result",
+            "arguments": [
+                "{input.0} > {recipe_dir}/exiftool_result.txt"
+            ]
+        },
+        {
+            "name": "strings",
+            "type": "module",
+            "inrecipe-name": "strings_result",
+            "arguments": [
+                "{input.0} > {recipe_dir}/strings_result.txt"
+            ]
+        },
+        {
+            "name": "grep",
+            "type": "module",
+            "inrecipe-name": "grep_flag_from_exiftool",
+            "arguments": [
+                "{input.1}",
+                "{recipe_dir}/exiftool_result.txt"
+            ]
+        },
+        {
+            "name": "grep",
+            "type": "module",
+            "inrecipe-name": "grep_flag_from_strings",
+            "arguments": [
+                "{input.1}",
+                "{recipe_dir}/strings_result.txt"
+            ]
+        }
+    ],
+    "output": [
+        "{grep_flag_from_exiftool.output.0}",
+        "{grep_flag_from_strings.output.0}"
+    ]
+}

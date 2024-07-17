@@ -1,0 +1,30 @@
+{
+    "$schema": "./schema.json",
+    "name": "sample-recipe",
+    "description": "sample recipe",
+    "prepare-recipe-directory": true,
+    "execution-chain": [
+        {
+            "name": "hoge",
+            "type": "module",
+            "inrecipe-name": "recipe-hoge",
+            "arguments": [
+                "{input.0}",
+                "{input.1}"
+            ]
+        },
+        {
+            "name": "fuga",
+            "type": "module",
+            "inrecipe-name": "recipe-fuga",
+            "arguments": [
+                "{recipe-hoge.output.1}",
+                "{input.2.somekey}"
+            ]
+        }
+    ],
+    "output": [
+        "{recipe-hoge.output}",
+        "{recipe-fuga.output.2}"
+    ]
+}

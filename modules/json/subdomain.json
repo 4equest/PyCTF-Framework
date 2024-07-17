@@ -1,0 +1,21 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "subdomain",
+    "description": "Get subdomain information from subdomain.center",
+    "execution": {
+        "command": [
+            "curl",
+            "https://api.subdomain.center/?domain={input.0}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

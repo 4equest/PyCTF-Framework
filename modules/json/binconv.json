@@ -1,0 +1,23 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "binconv",
+    "description": "Convert between binary, hexadecimal, and decimal representations.",
+    "execution": {
+        "command": [
+            "python3",
+            "{cwd}/modules/binconv/binconv.py",
+            "{input.0}",
+            "{input.1}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

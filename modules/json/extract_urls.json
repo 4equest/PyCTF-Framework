@@ -1,0 +1,22 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "extract_urls",
+    "description": "テキストからURLを抽出する",
+    "execution": {
+        "command": [
+            "python3",
+            "{cwd}/modules/extract_urls/extract_urls.py",
+            "{input.0}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

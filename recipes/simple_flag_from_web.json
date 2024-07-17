@@ -1,0 +1,28 @@
+{
+    "$schema": "./schema.json",
+    "name": "simple_flag_from_web",
+    "description": "Webサイトのディレクトリを探索し、フラグが含まれる可能性のあるファイルをダウンロードする",
+    "prepare-recipe-directory": true,
+    "execution-chain": [
+        {
+            "name": "curl",
+            "type": "module",
+            "inrecipe-name": "curl",
+            "arguments": [
+                "{input.0} > {recipe_dir}/curl.txt"
+            ]
+        },
+        {
+            "name": "grep",
+            "type": "module",
+            "inrecipe-name": "grep_flag",
+            "arguments": [
+                "{input.1}",
+                "{recipe_dir}/curl.txt"
+            ]
+        }
+    ],
+    "output": [
+        "{grep_flag.output.0}"
+    ]
+}

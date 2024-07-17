@@ -1,0 +1,21 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "nmap",
+    "description": "Perform port scanning using Nmap.",
+    "execution": {
+        "command": [
+            "nmap",
+            "{input.0}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}
