@@ -1,0 +1,22 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "johntheripper",
+    "description": "Password cracking using John the Ripper.",
+    "execution": {
+        "command": [
+            "john",
+            "{input.0}",
+            "--wordlist={cwd}/modules/johntheripper/password.lst"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

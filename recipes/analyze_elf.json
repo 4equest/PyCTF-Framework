@@ -1,0 +1,48 @@
+{
+    "$schema": "./schema.json",
+    "name": "analyze_elf",
+    "description": "ELFファイルを分析し、フラグを探す",
+    "prepare-recipe-directory": true,
+    "execution-chain": [
+        {
+            "name": "strings",
+            "type": "module",
+            "inrecipe-name": "strings_result",
+            "arguments": [
+                "{input.0} | tee -a {recipe_dir}/strings_result.txt"
+            ]
+        },
+        {
+            "name": "objdump",
+            "type": "module",
+            "inrecipe-name": "objdump_result",
+            "arguments": [
+                "{input.0} | tee -a {recipe_dir}/objdump_result.txt"
+            ]
+        },
+        {
+            "name": "grep",
+            "type": "module",
+            "inrecipe-name": "grep_flag_from_strings",
+            "arguments": [
+                "{input.1}",
+                "{recipe_dir}/strings_result.txt"
+            ]
+        },
+        {
+            "name": "grep",
+            "type": "module",
+            "inrecipe-name": "grep_flag_from_objdump",
+            "arguments": [
+                "{input.1}",
+                "{recipe_dir}/objdump_result.txt"
+            ]
+        }
+    ],
+    "output": [
+        "{strings_result.output.0}",
+        "{objdump_result.output.0}",
+        "{grep_flag_from_strings.output.0}",
+        "{grep_flag_from_objdump.output.0}"
+    ]
+}

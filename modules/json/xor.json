@@ -1,0 +1,23 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "xor",
+    "description": "Perform XOR operation on two strings.",
+    "execution": {
+        "command": [
+            "python3",
+            "{cwd}/modules/xor/xor.py",
+            "{input.0}",
+            "{input.1}"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

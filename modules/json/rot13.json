@@ -1,0 +1,25 @@
+{
+    "$schema": "./schema.json",
+    "type": "external",
+    "name": "rot13",
+    "description": "Encode or decode text using ROT13 cipher.",
+    "execution": {
+        "command": [
+            "echo",
+            "{input.0}",
+            "|",
+            "tr",
+            "'A-Za-z'",
+            "'N-ZA-Mn-za-m'"
+        ]
+    },
+    "prepare-module-directory": false,
+    "data": {
+        "input": {
+            "type": "json"
+        },
+        "output": {
+            "type": "json"
+        }
+    }
+}

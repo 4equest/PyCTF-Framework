@@ -1,0 +1,47 @@
+{
+    "$schema": "./schema.json",
+    "name": "analyze_pcap",
+    "description": "pcapファイルを分析し、フラグを探す",
+    "prepare-recipe-directory": true,
+    "execution-chain": [
+        {
+            "name": "tshark",
+            "type": "module",
+            "inrecipe-name": "http_packets",
+            "arguments": [
+                "-r　{input.0} -Y http -T fields -e http.request_uri"
+            ]
+        },
+        {
+            "name": "extract_urls",
+            "type": "module",
+            "inrecipe-name": "extracted_urls",
+            "arguments": [
+                "{http_packets.output.0} | tee -a {recipe_dir}/extracted_urls.txt"
+            ]
+        },
+        {
+            "name": "download",
+            "type": "module",
+            "inrecipe-name": "downloaded_files",
+            "arguments": [
+                "{recipe_dir}/extracted_urls.txt",
+                "{recipe_dir}"
+            ]
+        },
+        {
+            "name": "grep",
+            "type": "module",
+            "inrecipe-name": "grep_flag",
+            "arguments": [
+                "{input.1}",
+                "{downloaded_files.output.0}"
+            ]
+        }
+    ],
+    "output": [
+        "{http_packets.output.0}",
+        "{extracted_urls.output.0}",
+        "{grep_flag.output.0}"
+    ]
+}
