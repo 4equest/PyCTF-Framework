@@ -75,7 +75,8 @@ class WorkSpace:
     def get_module_state_list(self) -> object:
         return self.module_state
     
-    def get_module_list(self) -> list:
+    @staticmethod
+    def get_module_list() -> list:
         return Module.get_module_list()
     
     @staticmethod
@@ -120,7 +121,8 @@ class WorkSpace:
     def get_recipe_state_list(self) -> object:
         return self.recipe_state
     
-    def get_recipe_list(self) -> list:
+    @staticmethod    
+    def get_recipe_list() -> list:
         return Recipe.get_recipe_list()
 
     @staticmethod
